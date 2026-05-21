@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>TI HelpDesk</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0b0f1a;--surface:#111827;--card:#161e2e;--elevated:#1e2a40;--hover:#243044;--border:rgba(255,255,255,0.07);--text:#e2e8f0;--text2:#94a3b8;--text3:#4b5a72;--accent:#3b82f6;--blue:#3b82f6;--blue-dim:rgba(59,130,246,.15);--green:#22c55e;--green-dim:rgba(34,197,94,.15);--amber:#f59e0b;--amber-dim:rgba(245,158,11,.15);--red:#ef4444;--red-dim:rgba(239,68,68,.15);--orange:#f97316;--orange-dim:rgba(249,115,22,.15);--purple:#8b5cf6;--purple-dim:rgba(139,92,246,.15);--sidebar:220px;--drawer:440px;--radius:10px;--shadow:0 4px 24px rgba(0,0,0,.4)}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;font-size:14px;line-height:1.5}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--elevated);border-radius:99px}
+.sidebar{width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;z-index:20}
+.sidebar-logo{padding:18px 16px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);cursor:pointer}
+.logo-icon{width:34px;height:34px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;flex-shrink:0;overflow:hidden}
+.logo-icon img{width:100%;height:100%;object-fit:contain}
+.logo-text{font-weight:700;font-size:15px;color:var(--text);line-height:1.2}
+.logo-sub{font-size:11px;color:var(--text2)}
+.nav{flex:1;padding:10px 8px;overflow-y:auto}
+.nav-section{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:12px 8px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;cursor:pointer;color:var(--text2);font-size:13.5px;font-weight:500;transition:all .15s;margin-bottom:2px;position:relative}
+.nav-item:hover{background:var(--elevated);color:var(--text)}
+.nav-item.active{background:var(--blue-dim);color:var(--blue)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;background:var(--blue);border-radius:0 3px 3px 0}
+.nav-item i{font-size:18px;width:20px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;min-width:18px;text-align:center}
+.nav-badge.amber{background:var(--amber)}
+.sidebar-footer{padding:12px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer;transition:background .15s}
+.user-card:hover{background:var(--elevated)}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role{font-size:11px;color:var(--text2)}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.topbar-title{font-size:17px;font-weight:700;flex:1}
+.topbar-title span{color:var(--text2);font-weight:400;font-size:13px;margin-left:8px}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--elevated);border:1px solid var(--border);border-radius:8px;padding:7px 12px;width:240px}
+.search-box i{color:var(--text3);font-size:16px}
+.search-box input{background:none;border:none;outline:none;color:var(--text);font-size:13px;width:100%;font-family:inherit}
+.search-box input::placeholder{color:var(--text3)}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;font-family:inherit}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#2563eb}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,.3)}.btn-danger:hover{background:var(--red);color:#fff}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{background:var(--elevated);color:var(--text)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.icon-btn{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);border:1px solid var(--border);background:transparent;transition:all .15s;position:relative}
+.icon-btn:hover{background:var(--elevated);color:var(--text)}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--red);border-radius:50%;border:2px solid var(--surface)}
+.content{flex:1;overflow-y:auto;padding:20px}
+.view{display:none}.view.active{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:default;transition:transform .15s,border-color .15s}
+.kpi-card:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.12)}
+.kpi-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.kpi-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.kpi-icon.blue{background:var(--blue-dim);color:var(--blue)}.kpi-icon.purple{background:var(--purple-dim);color:var(--purple)}.kpi-icon.amber{background:var(--amber-dim);color:var(--amber)}.kpi-icon.green{background:var(--green-dim);color:var(--green)}.kpi-icon.red{background:var(--red-dim);color:var(--red)}
+.kpi-value{font-size:28px;font-weight:800;letter-spacing:-1px;line-height:1}
+.kpi-label{font-size:12px;color:var(--text2);margin-top:3px;font-weight:500}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.section-title{font-size:15px;font-weight:700}
+.section-actions{display:flex;align-items:center;gap:8px}
+.filters{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.filter-btn{padding:6px 12px;border-radius:99px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;font-family:inherit}
+.filter-btn:hover,.filter-btn.active{background:var(--blue-dim);border-color:var(--blue);color:var(--blue)}
+.filter-select{background:var(--elevated);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text2);font-size:12px;font-family:inherit;outline:none;cursor:pointer}
+.filter-select:focus{border-color:var(--blue)}
+.table-wrapper{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--elevated);padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--hover)}
+tbody tr.selected{background:var(--blue-dim)}
+td{padding:11px 14px;font-size:13px;color:var(--text2)}
+td.bold{color:var(--text);font-weight:600}
+td.number{font-family:'SF Mono','Fira Code',monospace;font-size:12px;font-weight:600;color:var(--blue)}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%}
+.badge.critica{background:var(--red-dim);color:var(--red)}.badge.critica::before{background:var(--red)}
+.badge.alta{background:var(--orange-dim);color:var(--orange)}.badge.alta::before{background:var(--orange)}
+.badge.media{background:var(--amber-dim);color:var(--amber)}.badge.media::before{background:var(--amber)}
+.badge.baixa{background:var(--green-dim);color:var(--green)}.badge.baixa::before{background:var(--green)}
+.badge.aberto{background:var(--blue-dim);color:var(--blue)}.badge.aberto::before{background:var(--blue)}
+.badge.andamento{background:var(--purple-dim);color:var(--purple)}.badge.andamento::before{background:var(--purple)}
+.badge.pendente{background:var(--amber-dim);color:var(--amber)}.badge.pendente::before{background:var(--amber)}
+.badge.resolvido{background:var(--green-dim);color:var(--green)}.badge.resolvido::before{background:var(--green)}
+.badge.cancelado{background:var(--elevated);color:var(--text3)}.badge.cancelado::before{background:var(--text3)}
+.badge.level{background:var(--elevated);color:var(--text2);font-size:11px;padding:2px 7px;border-radius:5px}.badge.level::before{display:none}
+.sla-cell{min-width:120px}
+.sla-bar-wrap{display:flex;align-items:center;gap:8px}
+.sla-bar{flex:1;height:5px;background:var(--elevated);border-radius:99px;overflow:hidden}
+.sla-fill{height:100%;border-radius:99px}
+.sla-fill.ok{background:var(--green)}.sla-fill.warn{background:var(--amber)}.sla-fill.danger{background:var(--red)}
+.sla-pct{font-size:11px;font-weight:700;min-width:32px;text-align:right}
+.sla-pct.ok{color:var(--green)}.sla-pct.warn{color:var(--amber)}.sla-pct.danger{color:var(--red)}
+.drawer{width:var(--drawer);background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);position:relative;z-index:10}
+.drawer.open{transform:translateX(0)}
+.drawer-header{padding:16px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+.drawer-ticket-id{font-size:12px;font-weight:700;color:var(--blue);letter-spacing:.05em;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.drawer-title{font-size:15px;font-weight:700;color:var(--text);line-height:1.4;margin-bottom:10px}
+.drawer-badges{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.drawer-close{position:absolute;right:14px;top:14px;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);background:transparent;border:none;font-size:18px;transition:all .15s}
+.drawer-close:hover{background:var(--elevated);color:var(--text)}
+.drawer-body{flex:1;overflow-y:auto;padding:0}
+.drawer-section{padding:14px 18px;border-bottom:1px solid var(--border)}
+.drawer-section-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.drawer-section-title i{font-size:14px}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.meta-item label{font-size:11px;color:var(--text3);display:block;margin-bottom:3px;font-weight:500}
+.meta-item .val{font-size:13px;color:var(--text);font-weight:500}
+.meta-item .val.muted{color:var(--text2)}
+.escalation-flow{display:flex;align-items:center;gap:8px;padding:4px 0}
+.esc-node{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.esc-circle{width:40px;height:40px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--text3);background:var(--elevated);transition:all .2s}
+.esc-circle.active{border-color:var(--blue);color:var(--blue);background:var(--blue-dim);box-shadow:0 0 0 4px rgba(59,130,246,.12)}
+.esc-circle.done{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+.esc-label{font-size:10px;color:var(--text3);font-weight:500}
+.esc-arrow{color:var(--text3);font-size:16px;flex-shrink:0;margin-bottom:14px}
+.esc-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.sla-detail-bar{height:8px;background:var(--elevated);border-radius:99px;overflow:hidden;margin:8px 0}
+.sla-detail-fill{height:100%;border-radius:99px}
+.sla-detail-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--text3)}
+.timeline{padding:4px 0}
+.tl-item{display:flex;gap:12px;padding:8px 0;position:relative}
+.tl-item:not(:last-child)::before{content:'';position:absolute;left:15px;top:32px;bottom:0;width:1px;background:var(--border)}
+.tl-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px}
+.tl-dot.blue{background:var(--blue-dim);color:var(--blue)}.tl-dot.green{background:var(--green-dim);color:var(--green)}.tl-dot.amber{background:var(--amber-dim);color:var(--amber)}.tl-dot.purple{background:var(--purple-dim);color:var(--purple)}.tl-dot.red{background:var(--red-dim);color:var(--red)}
+.tl-content{flex:1;min-width:0}
+.tl-action{font-size:13px;color:var(--text);font-weight:500}
+.tl-note{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.5}
+.tl-time{font-size:11px;color:var(--text3);margin-top:3px}
+.comment-box{background:var(--elevated);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);width:100%;min-height:72px;resize:none;font-family:inherit;outline:none;transition:border-color .15s}
+.comment-box:focus{border-color:var(--blue)}.comment-box::placeholder{color:var(--text3)}
+.drawer-footer{padding:14px 18px;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:10px}
+.ai-suggestion{background:var(--purple-dim);border:1px solid rgba(139,92,246,.3);border-radius:8px;padding:10px 12px;font-size:12.5px;color:#c4b5fd;line-height:1.6;display:none}
+.ai-suggestion.show{display:block}
+.ai-label{font-size:10px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;display:flex;align-items:center;gap:4px}
+.sla-rules-grid{display:grid;gap:14px}
+.sla-rule-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
+.sla-priority-badge{width:64px;height:64px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;flex-shrink:0}
+.sla-priority-badge .name{font-size:12px;font-weight:700}.sla-priority-badge .dot{width:8px;height:8px;border-radius:50%}
+.sla-priority-badge.critica{background:var(--red-dim)}.sla-priority-badge.alta{background:var(--orange-dim)}.sla-priority-badge.media{background:var(--amber-dim)}.sla-priority-badge.baixa{background:var(--green-dim)}
+.sla-rule-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sla-metric{background:var(--elevated);border-radius:8px;padding:10px}
+.sla-metric-val{font-size:20px;font-weight:800;letter-spacing:-.5px}
+.sla-metric-label{font-size:11px;color:var(--text2);margin-top:2px}.sla-metric-sub{font-size:10px;color:var(--text3);margin-top:1px}
+.sla-rule-name{font-size:15px;font-weight:700;margin-bottom:4px}.sla-rule-desc{font-size:12px;color:var(--text2);margin-bottom:12px}
+.itil-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:600;background:rgba(59,130,246,.1);color:var(--blue);margin-bottom:12px}
+.reports-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px}
+.report-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.report-card-title{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.chart-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.chart-bar-label{font-size:12px;color:var(--text2);width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chart-bar-track{flex:1;height:8px;background:var(--elevated);border-radius:99px;overflow:hidden}
+.chart-bar-fill{height:100%;border-radius:99px}
+.chart-bar-val{font-size:12px;font-weight:700;color:var(--text);width:30px;text-align:right}
+.donut-wrap{display:flex;align-items:center;gap:20px}
+.donut{width:80px;height:80px;flex-shrink:0}
+.donut-legends{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.donut-leg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.donut-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.metric-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.metric-row:last-child{border-bottom:none}
+.metric-row-label{font-size:13px;color:var(--text2)}
+.metric-row-val{font-size:14px;font-weight:700;color:var(--text)}.metric-row-val.good{color:var(--green)}.metric-row-val.warn{color:var(--amber)}.metric-row-val.bad{color:var(--red)}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--text3);gap:12px}
+.empty i{font-size:48px}.empty p{font-size:14px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-backdrop.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:560px;max-width:95vw;box-shadow:var(--shadow);overflow:hidden;max-height:90vh;display:flex;flex-direction:column}
+.modal-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-header h3{font-size:16px;font-weight:700}
+.modal-body{padding:20px;display:grid;gap:14px;overflow-y:auto}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--elevated);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--blue)}
+.form-textarea{min-height:80px;resize:vertical}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ai-panel{background:var(--purple-dim);border:1px solid rgba(139,92,246,.3);border-radius:10px;padding:14px;display:none}
+.ai-panel.show{display:block}
+.ai-panel-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.ai-panel-header i{color:var(--purple);font-size:18px}
+.ai-panel-header span{font-size:13px;font-weight:700;color:#c4b5fd}
+.ai-panel-header .confidence{margin-left:auto;font-size:11px;background:rgba(139,92,246,.2);color:#c4b5fd;padding:2px 8px;border-radius:99px;font-weight:700}
+.ai-field{margin-bottom:8px}.ai-field label{font-size:10px;font-weight:600;color:rgba(196,181,253,.6);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:3px}
+.ai-field .val{font-size:13px;color:#e9d5ff;font-weight:500}
+.ai-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.ai-tag{padding:2px 8px;background:rgba(139,92,246,.2);border-radius:99px;font-size:11px;color:#c4b5fd}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;font-weight:500;z-index:100;box-shadow:var(--shadow);display:flex;align-items:center;gap:8px;transform:translateY(80px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{border-left:3px solid var(--green);color:var(--text)}
+.toast.err{border-left:3px solid var(--red);color:var(--text)}
+/* CRUD views */
+.crud-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.crud-table-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+/* Assign select */
+#d-assign-wrap{margin-top:8px}
+/* Pagination */
+.pagination{display:flex;align-items:center;gap:6px;margin-top:14px;justify-content:center}
+.page-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
+.page-btn:hover,.page-btn.active{background:var(--blue-dim);border-color:var(--blue);color:var(--blue)}
+.page-btn:disabled{opacity:.4;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo" onclick="setView('config',navEl('config'))">
+    <div class="logo-icon" id="logo-icon"><i class="ti ti-ticket"></i></div>
+    <div>
+      <div class="logo-text" id="logo-text">TI HelpDesk</div>
+      <div class="logo-sub" id="logo-sub">v2.0 — Produção</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" data-view="dashboard" onclick="setView('dashboard',this)"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
+    <div class="nav-item" data-view="tickets" onclick="setView('tickets',this)"><i class="ti ti-ticket"></i> Chamados <span class="nav-badge" id="badge-tickets">—</span></div>
+    <div class="nav-item" data-view="sla" onclick="setView('sla',this)"><i class="ti ti-clock-hour-4"></i> SLA <span class="nav-badge amber" id="badge-sla" style="display:none"></span></div>
+    <div class="nav-item" data-view="reports" onclick="setView('reports',this)"><i class="ti ti-chart-bar"></i> Relatórios</div>
+    <div class="nav-section">Cadastros</div>
+    <div class="nav-item" data-view="usuarios" onclick="setView('usuarios',this)"><i class="ti ti-users"></i> Usuários</div>
+    <div class="nav-item" data-view="analistas" onclick="setView('analistas',this)"><i class="ti ti-user-shield"></i> Analistas</div>
+    <div class="nav-item" data-view="categorias" onclick="setView('categorias',this)"><i class="ti ti-tags"></i> Categorias</div>
+    <div class="nav-section">Sistema</div>
+    <div class="nav-item" data-view="config" onclick="setView('config',this)"><i class="ti ti-settings"></i> Configurações</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card" onclick="doLogout()">
+      <div class="avatar" id="user-avatar">AD</div>
+      <div class="user-info">
+        <div class="user-name" id="user-name">Carregando...</div>
+        <div class="user-role" id="user-role">—</div>
+      </div>
+      <i class="ti ti-logout" style="color:var(--text3);font-size:16px"></i>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-title" id="page-title">Dashboard <span>Visão geral do sistema</span></div>
+    <div class="search-box">
+      <i class="ti ti-search"></i>
+      <input type="text" id="global-search" placeholder="Buscar chamados..." onkeydown="if(event.key==='Enter')doSearch(this.value)">
+    </div>
+    <div class="topbar-actions">
+      <div class="icon-btn" onclick="refreshCurrent()" title="Atualizar"><i class="ti ti-refresh"></i></div>
+      <button class="btn btn-primary" onclick="openModal()"><i class="ti ti-plus"></i> Novo Chamado</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- VIEW: DASHBOARD -->
+    <div id="view-dashboard" class="view active">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-header"><div class="kpi-icon blue"><i class="ti ti-ticket"></i></div></div>
+          <div class="kpi-value" id="kpi-abertos">—</div>
+          <div class="kpi-label">Chamados Abertos</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header"><div class="kpi-icon purple"><i class="ti ti-activity"></i></div></div>
+          <div class="kpi-value" id="kpi-andamento">—</div>
+          <div class="kpi-label">Em Andamento</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header"><div class="kpi-icon amber"><i class="ti ti-pause"></i></div></div>
+          <div class="kpi-value" id="kpi-pendentes">—</div>
+          <div class="kpi-label">Pendentes</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header"><div class="kpi-icon green"><i class="ti ti-check"></i></div></div>
+          <div class="kpi-value" id="kpi-resolvidos">—</div>
+          <div class="kpi-label">Resolvidos (mês)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header"><div class="kpi-icon red"><i class="ti ti-alert-triangle"></i></div></div>
+          <div class="kpi-value" id="kpi-sla-risco">—</div>
+          <div class="kpi-label">SLA em Risco</div>
+        </div>
+      </div>
+      <div class="section-header">
+        <div class="section-title">Chamados Recentes</div>
+        <button class="btn btn-ghost btn-sm" onclick="setView('tickets',navEl('tickets'))">Ver todos →</button>
+      </div>
+      <div id="dashboard-table"><div class="empty"><i class="ti ti-loader" style="animation:spin 1s linear infinite"></i><p>Carregando...</p></div></div>
+    </div>
+
+    <!-- VIEW: CHAMADOS -->
+    <div id="view-tickets" class="view">
+      <div class="filters">
+        <button class="filter-btn active" onclick="setFilter(this,'')">Todos</button>
+        <button class="filter-btn" onclick="setFilter(this,'Aberto')">Abertos</button>
+        <button class="filter-btn" onclick="setFilter(this,'Em andamento')">Em andamento</button>
+        <button class="filter-btn" onclick="setFilter(this,'Pendente')">Pendentes</button>
+        <button class="filter-btn" onclick="setFilter(this,'Resolvido')">Resolvidos</button>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <select class="filter-select" id="filter-priority" onchange="loadTickets()">
+            <option value="">Todas as prioridades</option>
+            <option>Crítica</option><option>Alta</option><option>Média</option><option>Baixa</option>
+          </select>
+          <select class="filter-select" id="filter-level" onchange="loadTickets()">
+            <option value="">Todos os níveis</option>
+            <option>N1</option><option>N2</option><option>N3</option>
+          </select>
+          <select class="filter-select" id="filter-analyst" onchange="loadTickets()">
+            <option value="">Todos os analistas</option>
+          </select>
+        </div>
+      </div>
+      <div id="tickets-table"></div>
+      <div id="tickets-pagination"></div>
+    </div>
+
+    <!-- VIEW: SLA -->
+    <div id="view-sla" class="view">
+      <div class="section-header" style="margin-bottom:18px">
+        <div class="section-title">Regras de SLA — Referência ITIL 4 / ISO 20000</div>
+      </div>
+      <div class="sla-rules-grid" id="sla-rules-grid">
+        <div class="empty"><i class="ti ti-loader" style="animation:spin 1s linear infinite"></i><p>Carregando...</p></div>
+      </div>
+      <div style="margin-top:20px">
+        <div class="section-header"><div class="section-title">Chamados em Risco de SLA</div></div>
+        <div id="sla-atrisk-table"></div>
+      </div>
+    </div>
+
+    <!-- VIEW: RELATÓRIOS -->
+    <div id="view-reports" class="view">
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="kpi-card"><div class="kpi-header"><div class="kpi-icon green"><i class="ti ti-chart-line"></i></div></div><div class="kpi-value" id="r-taxa">—</div><div class="kpi-label">Taxa de Resolução</div></div>
+        <div class="kpi-card"><div class="kpi-header"><div class="kpi-icon blue"><i class="ti ti-clock"></i></div></div><div class="kpi-value" id="r-tma">—</div><div class="kpi-label">TMA (1ª Resposta)</div></div>
+        <div class="kpi-card"><div class="kpi-header"><div class="kpi-icon purple"><i class="ti ti-hourglass"></i></div></div><div class="kpi-value" id="r-tmr">—</div><div class="kpi-label">TMR (Resolução)</div></div>
+        <div class="kpi-card"><div class="kpi-header"><div class="kpi-icon amber"><i class="ti ti-shield"></i></div></div><div class="kpi-value" id="r-sla">—</div><div class="kpi-label">Aderência ao SLA</div></div>
+      </div>
+      <div class="reports-grid">
+        <div class="report-card">
+          <div class="report-card-title"><i class="ti ti-tag" style="color:var(--blue)"></i> Chamados por Categoria</div>
+          <div id="chart-category"></div>
+        </div>
+        <div class="report-card">
+          <div class="report-card-title"><i class="ti ti-flag" style="color:var(--orange)"></i> Distribuição por Prioridade</div>
+          <div id="chart-priority" class="donut-wrap"><svg class="donut" id="donut-svg" viewBox="0 0 36 36"></svg><div class="donut-legends" id="donut-legend"></div></div>
+        </div>
+        <div class="report-card">
+          <div class="report-card-title"><i class="ti ti-user-check" style="color:var(--green)"></i> Performance por Analista</div>
+          <div id="chart-analyst"></div>
+        </div>
+        <div class="report-card">
+          <div class="report-card-title"><i class="ti ti-download" style="color:var(--blue)"></i> Exportar</div>
+          <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Exporte todos os chamados do período para CSV.</p>
+          <button class="btn btn-ghost" onclick="exportCsv()"><i class="ti ti-file-spreadsheet"></i> Exportar CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: USUÁRIOS -->
+    <div id="view-usuarios" class="view">
+      <div class="crud-header">
+        <div class="section-title">Usuários</div>
+        <button class="btn btn-primary btn-sm" onclick="openUserModal()"><i class="ti ti-plus"></i> Novo Usuário</button>
+      </div>
+      <div id="usuarios-table"></div>
+    </div>
+
+    <!-- VIEW: ANALISTAS -->
+    <div id="view-analistas" class="view">
+      <div class="crud-header">
+        <div class="section-title">Analistas</div>
+        <button class="btn btn-primary btn-sm" onclick="openAnalystModal()"><i class="ti ti-plus"></i> Novo Analista</button>
+      </div>
+      <div id="analistas-table"></div>
+    </div>
+
+    <!-- VIEW: CATEGORIAS -->
+    <div id="view-categorias" class="view">
+      <div class="crud-header">
+        <div class="section-title">Categorias</div>
+        <button class="btn btn-primary btn-sm" onclick="openCategoryModal()"><i class="ti ti-plus"></i> Nova Categoria</button>
+      </div>
+      <div id="categorias-table"></div>
+    </div>
+
+    <!-- VIEW: CONFIG -->
+    <div id="view-config" class="view">
+      <div style="max-width:500px">
+        <div class="section-title" style="margin-bottom:18px">Configurações</div>
+        <div class="report-card" style="margin-bottom:14px">
+          <div class="report-card-title"><i class="ti ti-building" style="color:var(--blue)"></i> Identidade Visual</div>
+          <div class="form-group" style="margin-bottom:10px"><label>Nome do sistema</label><input class="form-input" id="cfg-name" value="TI HelpDesk" oninput="updateBranding()"></div>
+          <div class="form-group"><label>Subtítulo</label><input class="form-input" id="cfg-sub" value="v2.0 — Produção" oninput="updateBranding()"></div>
+        </div>
+        <div class="report-card">
+          <div class="report-card-title"><i class="ti ti-palette" style="color:var(--purple)"></i> Cor de destaque</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+            <div onclick="applyTheme('#3b82f6',this)" style="width:32px;height:32px;border-radius:50%;background:#3b82f6;cursor:pointer;border:2px solid transparent" class="color-dot"></div>
+            <div onclick="applyTheme('#8b5cf6',this)" style="width:32px;height:32px;border-radius:50%;background:#8b5cf6;cursor:pointer;border:2px solid transparent" class="color-dot"></div>
+            <div onclick="applyTheme('#22c55e',this)" style="width:32px;height:32px;border-radius:50%;background:#22c55e;cursor:pointer;border:2px solid transparent" class="color-dot"></div>
+            <div onclick="applyTheme('#06b6d4',this)" style="width:32px;height:32px;border-radius:50%;background:#06b6d4;cursor:pointer;border:2px solid transparent" class="color-dot"></div>
+            <div onclick="applyTheme('#f59e0b',this)" style="width:32px;height:32px;border-radius:50%;background:#f59e0b;cursor:pointer;border:2px solid transparent" class="color-dot"></div>
+            <div onclick="applyTheme('#ef4444',this)" style="width:32px;height:32px;border-radius:50%;background:#ef4444;cursor:pointer;border:2px solid transparent" class="color-dot"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- DRAWER: DETALHE DO CHAMADO -->
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <button class="drawer-close" onclick="closeDrawer()"><i class="ti ti-x"></i></button>
+    <div class="drawer-ticket-id"><i class="ti ti-ticket" style="font-size:14px"></i><span id="d-number">—</span><span id="d-ago" style="color:var(--text3);font-size:11px"></span></div>
+    <div class="drawer-title" id="d-title">—</div>
+    <div class="drawer-badges">
+      <span class="badge" id="d-priority">—</span>
+      <span class="badge" id="d-status">—</span>
+      <span class="badge level" id="d-level">—</span>
+    </div>
+  </div>
+  <div class="drawer-body">
+
+    <div class="drawer-section">
+      <div class="drawer-section-title"><i class="ti ti-arrows-up"></i> Fluxo de Escalada</div>
+      <div class="escalation-flow">
+        <div class="esc-node"><div class="esc-circle" id="esc-n1">N1</div><div class="esc-label">N1 — Suporte</div></div>
+        <div class="esc-arrow">→</div>
+        <div class="esc-node"><div class="esc-circle" id="esc-n2">N2</div><div class="esc-label">N2 — Especialista</div></div>
+        <div class="esc-arrow">→</div>
+        <div class="esc-node"><div class="esc-circle" id="esc-n3">N3</div><div class="esc-label">N3 — Infra</div></div>
+      </div>
+      <div class="esc-actions">
+        <button class="btn btn-ghost btn-sm" onclick="doEscalate('N2')"><i class="ti ti-arrow-up"></i> Escalar N2</button>
+        <button class="btn btn-ghost btn-sm" onclick="doEscalate('N3')"><i class="ti ti-arrow-up"></i> Escalar N3</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleAssign()"><i class="ti ti-user"></i> Atribuir</button>
+      </div>
+      <div id="d-assign-wrap" style="display:none;margin-top:10px;display:none">
+        <select class="form-select" id="d-analyst-select" style="margin-bottom:6px"><option value="">Selecionar analista...</option></select>
+        <button class="btn btn-primary btn-sm" onclick="doAssign()">Confirmar atribuição</button>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title"><i class="ti ti-info-circle"></i> Informações</div>
+      <div class="meta-grid">
+        <div class="meta-item"><label>Solicitante</label><div class="val" id="d-user">—</div></div>
+        <div class="meta-item"><label>Departamento</label><div class="val" id="d-dept">—</div></div>
+        <div class="meta-item"><label>Categoria</label><div class="val" id="d-cat">—</div></div>
+        <div class="meta-item"><label>Analista</label><div class="val" id="d-analyst">—</div></div>
+        <div class="meta-item"><label>Impacto</label><div class="val" id="d-impact">—</div></div>
+        <div class="meta-item"><label>Equipamento</label><div class="val muted" id="d-equip">—</div></div>
+      </div>
+      <div style="margin-top:10px"><label style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Descrição</label><div id="d-desc" style="font-size:13px;color:var(--text2);margin-top:4px;line-height:1.6"></div></div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title"><i class="ti ti-clock"></i> SLA</div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
+        <span style="color:var(--text2)">Prazo de resolução</span>
+        <span id="d-sla-pct" style="font-weight:700">—</span>
+      </div>
+      <div class="sla-detail-bar"><div class="sla-detail-fill" id="d-sla-bar" style="width:0%;background:var(--green)"></div></div>
+      <div class="sla-detail-meta"><span id="d-sla-open">—</span><span id="d-sla-deadline">—</span></div>
+    </div>
+
+    <div class="drawer-section" id="d-ai-section" style="display:none">
+      <div class="drawer-section-title"><i class="ti ti-robot"></i> Análise da IA</div>
+      <div id="d-ai-content" style="background:var(--purple-dim);border:1px solid rgba(139,92,246,.25);border-radius:8px;padding:12px">
+        <div style="font-size:12.5px;color:#e9d5ff;line-height:1.5" id="d-ai-text"></div>
+      </div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title"><i class="ti ti-timeline"></i> Histórico</div>
+      <div class="timeline" id="d-timeline"><div class="empty" style="padding:20px"><i class="ti ti-loader" style="animation:spin 1s linear infinite;font-size:24px"></i></div></div>
+    </div>
+
+  </div>
+  <div class="drawer-footer">
+    <div id="d-ai-suggestion" class="ai-suggestion">
+      <div class="ai-label"><i class="ti ti-sparkles" style="font-size:13px"></i> Sugestão da IA</div>
+      <span id="d-ai-suggest-text"></span>
+    </div>
+    <textarea class="comment-box" id="d-comment" placeholder="Adicione um comentário ou ação..."></textarea>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost btn-sm" style="flex:1" onclick="doAISuggest()"><i class="ti ti-robot"></i> IA</button>
+      <button class="btn btn-ghost btn-sm" onclick="doSetPending()" style="background:var(--amber-dim);border-color:rgba(245,158,11,.3);color:var(--amber)"><i class="ti ti-clock-pause"></i> Pendente</button>
+      <button class="btn btn-ghost btn-sm" onclick="doComment()"><i class="ti ti-message"></i> Comentar</button>
+      <button class="btn btn-primary btn-sm" style="flex:1" onclick="doResolve()"><i class="ti ti-check"></i> Resolver</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NOVO CHAMADO -->
+<div class="modal-backdrop" id="modal-ticket">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="ti ti-ticket" style="color:var(--blue)"></i> Novo Chamado</h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Solicitante</label>
+        <select class="form-select" id="m-user"><option value="">Selecionar usuário...</option></select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Categoria</label>
+          <select class="form-select" id="m-category"><option value="">Selecionar...</option></select>
+        </div>
+        <div class="form-group">
+          <label>Impacto</label>
+          <select class="form-select" id="m-impact">
+            <option value="Alto">Alto</option><option value="Médio">Médio</option><option value="Baixo">Baixo</option><option value="Crítico">Crítico</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Título</label>
+        <input class="form-input" type="text" id="m-title" placeholder="Descreva o problema em uma linha..." oninput="debounceAnalyze()">
+      </div>
+      <div class="form-group">
+        <label>Descrição</label>
+        <textarea class="form-textarea" id="m-desc" placeholder="Explique o problema, quando começou, quais sistemas afetados..." oninput="debounceAnalyze()"></textarea>
+      </div>
+      <div class="ai-panel" id="m-ai-panel">
+        <div class="ai-panel-header">
+          <i class="ti ti-sparkles"></i>
+          <span>Análise da IA (Claude)</span>
+          <div class="confidence" id="m-ai-conf">—</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px">
+          <div class="ai-field"><label>Prioridade</label><div class="val" id="m-ai-priority">—</div></div>
+          <div class="ai-field"><label>Nível</label><div class="val" id="m-ai-level">—</div></div>
+          <div class="ai-field"><label>Confiança</label><div class="val" id="m-ai-confval" style="color:var(--purple)">—</div></div>
+        </div>
+        <div class="ai-field"><label>Justificativa</label><div class="val" id="m-ai-just">—</div></div>
+        <div class="ai-tags" id="m-ai-tags"></div>
+        <div style="margin-top:10px;display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" style="font-size:12px" onclick="acceptAI()"><i class="ti ti-check"></i> Aceitar</button>
+          <button class="btn btn-ghost btn-sm" style="font-size:12px" onclick="document.getElementById('m-ai-panel').classList.remove('show')"><i class="ti ti-x"></i> Ignorar</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="m-submit" onclick="submitTicket()"><i class="ti ti-send"></i> Abrir Chamado</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: USUÁRIO -->
+<div class="modal-backdrop" id="modal-user">
+  <div class="modal">
+    <div class="modal-header"><h3 id="user-modal-title">Novo Usuário</h3><button class="btn btn-ghost btn-sm" onclick="closeUserModal()"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Nome</label><input class="form-input" id="u-name" placeholder="Nome completo"></div>
+      <div class="form-group"><label>E-mail</label><input class="form-input" id="u-email" type="email" placeholder="email@empresa.com"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Departamento</label><select class="form-select" id="u-dept"><option value="">Selecionar...</option></select></div>
+        <div class="form-group"><label>Ramal</label><input class="form-input" id="u-phone" placeholder="Ex: 1234"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeUserModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveUser()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ANALISTA -->
+<div class="modal-backdrop" id="modal-analyst">
+  <div class="modal">
+    <div class="modal-header"><h3 id="analyst-modal-title">Novo Analista</h3><button class="btn btn-ghost btn-sm" onclick="closeAnalystModal()"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Nome</label><input class="form-input" id="a-name" placeholder="Nome completo"></div>
+      <div class="form-group"><label>E-mail</label><input class="form-input" id="a-email" type="email" placeholder="email@empresa.com"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Nível</label><select class="form-select" id="a-level"><option value="N1">N1 — Suporte</option><option value="N2">N2 — Especialista</option><option value="N3">N3 — Infra</option></select></div>
+        <div class="form-group"><label>Senha</label><input class="form-input" id="a-password" type="password" placeholder="Mínimo 6 caracteres"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeAnalystModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveAnalyst()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CATEGORIA -->
+<div class="modal-backdrop" id="modal-category">
+  <div class="modal" style="width:380px">
+    <div class="modal-header"><h3 id="cat-modal-title">Nova Categoria</h3><button class="btn btn-ghost btn-sm" onclick="closeCategoryModal()"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Nome</label><input class="form-input" id="c-name" placeholder="Ex: Rede / VPN"></div>
+      <div class="form-group"><label>Descrição</label><input class="form-input" id="c-desc" placeholder="Descrição breve"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeCategoryModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveCategory()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── API BASE ────────────────────────────────────────────────────────────────
+function getBase(){
+  const p=location.port;
+  if(p==='5500'||p==='8080'||p==='3000'||location.protocol==='file:') return 'http://localhost:8000';
+  return '';
+}
+const BASE = getBase();
+const API  = BASE + '/api/v1';
+
+const tok = () => localStorage.getItem('helpdesk_token');
+const hdrs = () => ({'Content-Type':'application/json','Authorization':'Bearer '+tok()});
+
+async function req(url, opts={}){
+  const r = await fetch(API+url, {...opts, headers:hdrs()});
+  if(r.status===401){ localStorage.removeItem('helpdesk_token'); location.href='/'; return null; }
+  if(r.status===204) return null;
+  const j = await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(j.detail||'Erro '+r.status);
+  return j;
+}
+
+// ── STATE ───────────────────────────────────────────────────────────────────
+let currentView = 'dashboard';
+let currentTicketId = null;
+let ticketStatus = '';
+let ticketPage = 1;
+let aiData = null;
+let editUserId = null, editAnalystId = null, editCatId = null;
+let _analysts = [], _categories = [], _users = [], _depts = [];
+let debTimer = null;
+
+// ── INIT ────────────────────────────────────────────────────────────────────
+(async function init(){
+  if(!tok()){ location.href='/'; return; }
+  try {
+    const me = await req('/auth/me');
+    if(!me) return;
+    const initials = me.name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('user-avatar').textContent = initials;
+    document.getElementById('user-name').textContent = me.name;
+    document.getElementById('user-role').textContent = (me.role||'analista')+' · '+(me.level||'');
+  } catch(e){ console.warn('me:', e); }
+  loadDashboard();
+  loadCaches();
+})();
+
+async function loadCaches(){
+  try { _analysts   = (await req('/analysts'))   || []; populateAnalystFilter(); populateAnalystSelect(); } catch(e){}
+  try { _categories = (await req('/categories')) || []; populateCategorySelect(); } catch(e){}
+  try { _users      = (await req('/users'))      || []; populateUserSelect(); } catch(e){}
+  try { _depts      = (await req('/departments'))|| []; populateDeptSelect(); } catch(e){}
+}
+
+// ── TOAST ───────────────────────────────────────────────────────────────────
+function toast(msg, type='ok'){
+  const el=document.getElementById('toast');
+  el.className='toast show '+(type==='ok'?'ok':'err');
+  el.innerHTML=(type==='ok'?'<i class="ti ti-check" style="color:var(--green)"></i> ':'<i class="ti ti-x" style="color:var(--red)"></i> ')+msg;
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// ── NAVIGATION ──────────────────────────────────────────────────────────────
+const viewTitles={dashboard:['Dashboard','Visão geral'],tickets:['Chamados','Gestão e acompanhamento'],sla:['SLA','Regras e prazos'],reports:['Relatórios','KPIs gerenciais'],usuarios:['Usuários','Cadastro de solicitantes'],analistas:['Analistas','Equipe de suporte'],categorias:['Categorias','Classificação'],config:['Configurações','Parâmetros']};
+
+function navEl(v){ return document.querySelector('[data-view="'+v+'"]'); }
+
+function setView(v, el){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  if(el) el.classList.add('active');
+  const [t,s]=viewTitles[v]||[v,''];
+  document.getElementById('page-title').innerHTML=t+' <span>'+s+'</span>';
+  currentView=v;
+  if(v==='tickets') loadTickets();
+  else if(v==='sla') loadSLA();
+  else if(v==='reports') loadReports();
+  else if(v==='usuarios') loadUsers();
+  else if(v==='analistas') loadAnalysts();
+  else if(v==='categorias') loadCategories();
+}
+
+function refreshCurrent(){ setView(currentView, navEl(currentView)); }
+
+function doSearch(q){
+  ticketStatus=''; ticketPage=1;
+  document.getElementById('global-search').value=q;
+  setView('tickets', navEl('tickets'));
+  loadTickets(q);
+}
+
+function doLogout(){ localStorage.removeItem('helpdesk_token'); localStorage.removeItem('helpdesk_analyst'); location.href='/'; }
+
+// ── HELPERS ─────────────────────────────────────────────────────────────────
+function priClass(p){ return {Crítica:'critica',Alta:'alta',Média:'media',Baixa:'baixa'}[p]||'baixa'; }
+function statusClass(s){ return {Aberto:'aberto','Em andamento':'andamento',Pendente:'pendente',Resolvido:'resolvido',Cancelado:'cancelado'}[s]||'aberto'; }
+function slaClass(v){ return v>=80?'danger':v>=60?'warn':'ok'; }
+function fmtDate(d){ if(!d) return '—'; return new Date(d).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function timeAgo(d){ if(!d) return ''; const s=Math.floor((Date.now()-new Date(d))/1000); if(s<60) return 'agora'; if(s<3600) return Math.floor(s/60)+'min'; if(s<86400) return Math.floor(s/3600)+'h'; return Math.floor(s/86400)+'d'; }
+function fmtHours(h){ if(h==null) return '—'; if(h<1) return Math.round(h*60)+'min'; return h.toFixed(1)+'h'; }
+
+// ── DASHBOARD ───────────────────────────────────────────────────────────────
+async function loadDashboard(){
+  try {
+    const kpis = await req('/reports/kpis');
+    if(kpis){
+      document.getElementById('kpi-abertos').textContent   = kpis.open_tickets   ?? '—';
+      document.getElementById('kpi-andamento').textContent = kpis.in_progress     ?? '—';
+      document.getElementById('kpi-pendentes').textContent = kpis.pending_tickets ?? '—';
+      document.getElementById('kpi-resolvidos').textContent= kpis.resolved_month  ?? '—';
+      document.getElementById('kpi-sla-risco').textContent = kpis.sla_at_risk     ?? '—';
+      const badgeSLA = document.getElementById('badge-sla');
+      if(kpis.sla_at_risk>0){ badgeSLA.textContent=kpis.sla_at_risk; badgeSLA.style.display=''; }
+    }
+  } catch(e){ console.warn(e); }
+
+  try {
+    const data = await req('/tickets?page=1&per_page=8');
+    if(data) renderTicketTable(data.items, 'dashboard-table', false);
+    const badgeT = document.getElementById('badge-tickets');
+    if(data) badgeT.textContent = data.total;
+  } catch(e){ document.getElementById('dashboard-table').innerHTML='<div class="empty"><i class="ti ti-alert-circle" style="color:var(--red)"></i><p>Erro ao carregar</p></div>'; }
+}
+
+// ── TICKETS LIST ─────────────────────────────────────────────────────────────
+async function loadTickets(search){
+  document.getElementById('tickets-table').innerHTML='<div class="empty"><i class="ti ti-loader" style="animation:spin 1s linear infinite;font-size:32px"></i></div>';
+  const params = new URLSearchParams();
+  if(ticketStatus) params.set('status', ticketStatus);
+  const pri  = document.getElementById('filter-priority')?.value;
+  const lvl  = document.getElementById('filter-level')?.value;
+  const ana  = document.getElementById('filter-analyst')?.value;
+  const q    = search || document.getElementById('global-search')?.value || '';
+  if(pri) params.set('priority', pri);
+  if(lvl) params.set('level', lvl);
+  if(ana) params.set('analyst_id', ana);
+  if(q)   params.set('search', q);
+  params.set('page', ticketPage);
+  params.set('per_page', 20);
+  try {
+    const data = await req('/tickets?'+params.toString());
+    if(!data) return;
+    renderTicketTable(data.items, 'tickets-table', true);
+    renderPagination(data.page, data.pages, 'tickets-pagination');
+    document.getElementById('badge-tickets').textContent = data.total;
+  } catch(e){ document.getElementById('tickets-table').innerHTML='<div class="empty"><i class="ti ti-alert-circle" style="color:var(--red)"></i><p>'+e.message+'</p></div>'; }
+}
+
+function setFilter(el, status){
+  document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  ticketStatus = status;
+  ticketPage = 1;
+  loadTickets();
+}
+
+function renderTicketTable(items, containerId, showPriority){
+  if(!items||!items.length){ document.getElementById(containerId).innerHTML='<div class="empty"><i class="ti ti-ticket"></i><p>Nenhum chamado encontrado</p></div>'; return; }
+  const rows = items.map(t=>{
+    const slaVal = calcSLAPct(t);
+    const sc = slaClass(slaVal);
+    return `<tr onclick="openTicket(${t.id})" ${currentTicketId===t.id?'class="selected"':''}>
+      <td class="number">${t.ticket_number||'—'}</td>
+      <td class="bold" style="max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.title)}</td>
+      <td>${esc(t.category?.name||'—')}</td>
+      <td><span class="badge ${priClass(t.priority)}">${t.priority}</span></td>
+      <td><span class="badge ${statusClass(t.status)}">${t.status}</span></td>
+      <td><span class="badge level">${t.level||'—'}</span></td>
+      <td class="sla-cell"><div class="sla-bar-wrap"><div class="sla-bar"><div class="sla-fill ${sc}" style="width:${Math.min(slaVal,100)}%"></div></div><span class="sla-pct ${sc}">${slaVal}%</span></div></td>
+      <td>${esc(t.analyst?.name||'—')}</td>
+      <td style="font-size:11px;color:var(--text3)">${timeAgo(t.created_at)}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById(containerId).innerHTML=`<div class="table-wrapper"><table><thead><tr><th>#</th><th>Título</th><th>Categoria</th><th>Prioridade</th><th>Status</th><th>Nível</th><th>SLA</th><th>Analista</th><th>Abertura</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function calcSLAPct(t){
+  if(!t.sla_deadline_at) return 0;
+  const open = new Date(t.created_at).getTime();
+  const dead = new Date(t.sla_deadline_at).getTime();
+  const now  = Date.now();
+  const total = dead - open;
+  if(total<=0) return 100;
+  return Math.round(((now - open) / total) * 100);
+}
+
+function renderPagination(page, pages, id){
+  if(pages<=1){ document.getElementById(id).innerHTML=''; return; }
+  let html='<div class="pagination">';
+  html+=`<button class="page-btn" onclick="gotoPage(${page-1})" ${page<=1?'disabled':''}>‹</button>`;
+  for(let i=1;i<=pages;i++){
+    if(i===1||i===pages||Math.abs(i-page)<=2) html+=`<button class="page-btn ${i===page?'active':''}" onclick="gotoPage(${i})">${i}</button>`;
+    else if(Math.abs(i-page)===3) html+='<span style="color:var(--text3);padding:0 4px">…</span>';
+  }
+  html+=`<button class="page-btn" onclick="gotoPage(${page+1})" ${page>=pages?'disabled':''}>›</button>`;
+  html+='</div>';
+  document.getElementById(id).innerHTML=html;
+}
+
+function gotoPage(p){ ticketPage=p; loadTickets(); }
+
+// ── TICKET DRAWER ────────────────────────────────────────────────────────────
+async function openTicket(id){
+  currentTicketId = id;
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('d-timeline').innerHTML='<div class="empty" style="padding:20px"><i class="ti ti-loader" style="animation:spin 1s linear infinite;font-size:24px"></i></div>';
+  try {
+    const t = await req('/tickets/'+id);
+    if(!t) return;
+    document.getElementById('d-number').textContent = t.ticket_number||'—';
+    document.getElementById('d-ago').textContent    = '· '+timeAgo(t.created_at);
+    document.getElementById('d-title').textContent  = t.title||'—';
+    const dp = document.getElementById('d-priority');
+    dp.className='badge '+priClass(t.priority); dp.textContent=t.priority||'—';
+    const ds = document.getElementById('d-status');
+    ds.className='badge '+statusClass(t.status); ds.textContent=t.status||'—';
+    document.getElementById('d-level').textContent   = t.level||'—';
+    document.getElementById('d-user').textContent    = t.user?.name||'—';
+    document.getElementById('d-dept').textContent    = t.department?.name||'—';
+    document.getElementById('d-cat').textContent     = t.category?.name||'—';
+    document.getElementById('d-analyst').textContent = t.analyst?.name||'Não atribuído';
+    document.getElementById('d-impact').textContent  = t.impact||'—';
+    document.getElementById('d-equip').textContent   = t.equipment||'—';
+    document.getElementById('d-desc').textContent    = t.description||'—';
+
+    // Escalation circles
+    const n1=document.getElementById('esc-n1'), n2=document.getElementById('esc-n2'), n3=document.getElementById('esc-n3');
+    [n1,n2,n3].forEach(c=>{c.className='esc-circle'; c.innerHTML=c.id.replace('esc-','').toUpperCase();});
+    if(t.level==='N1') n1.className='esc-circle active';
+    if(t.level==='N2'){ n1.className='esc-circle done'; n1.innerHTML='<i class="ti ti-check"></i>'; n2.className='esc-circle active'; }
+    if(t.level==='N3'){ n1.className='esc-circle done'; n1.innerHTML='<i class="ti ti-check"></i>'; n2.className='esc-circle done'; n2.innerHTML='<i class="ti ti-check"></i>'; n3.className='esc-circle active'; }
+
+    // SLA
+    const slaVal = calcSLAPct(t);
+    const sc = slaClass(slaVal);
+    const colorMap = {ok:'var(--green)',warn:'var(--amber)',danger:'var(--red)'};
+    document.getElementById('d-sla-pct').textContent = slaVal+'% consumido';
+    document.getElementById('d-sla-pct').style.color = colorMap[sc];
+    document.getElementById('d-sla-bar').style.width = Math.min(slaVal,100)+'%';
+    document.getElementById('d-sla-bar').style.background = 'linear-gradient(90deg,var(--green),'+colorMap[sc]+')';
+    document.getElementById('d-sla-open').textContent = 'Aberto: '+fmtDate(t.created_at);
+    document.getElementById('d-sla-deadline').textContent = t.sla_deadline_at ? 'Prazo: '+fmtDate(t.sla_deadline_at) : 'Sem prazo';
+    document.getElementById('d-sla-deadline').style.color = colorMap[sc];
+
+    // AI analysis
+    if(t.ai_analysis){
+      document.getElementById('d-ai-section').style.display='';
+      const ai=t.ai_analysis;
+      document.getElementById('d-ai-content').innerHTML=`
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span class="badge ${priClass(ai.priority||t.priority)}">${ai.priority||t.priority} · ${ai.level||t.level}</span>
+          <span style="font-size:11px;background:rgba(139,92,246,.15);color:#c4b5fd;padding:2px 8px;border-radius:99px;margin-left:auto">confiança: ${ai.confidence||'—'}%</span>
+        </div>
+        <div style="font-size:12.5px;color:#e9d5ff;line-height:1.5">${esc(ai.justification||'—')}</div>
+        ${(ai.tags||[]).map(tag=>`<span style="padding:2px 8px;background:rgba(139,92,246,.2);border-radius:99px;font-size:11px;color:#c4b5fd;margin:2px;display:inline-block">${esc(tag)}</span>`).join('')}`;
+    } else { document.getElementById('d-ai-section').style.display='none'; }
+
+    // Timeline
+    renderTimeline(t.timeline||[]);
+    document.getElementById('d-comment').value='';
+    document.getElementById('d-ai-suggestion').classList.remove('show');
+  } catch(e){ toast(e.message,'err'); }
+}
+
+function renderTimeline(items){
+  const iconMap={open:'ti-ticket',assign:'ti-user',escalate:'ti-arrows-up',comment:'ti-message',resolve:'ti-check',status:'ti-refresh',ai:'ti-robot',priority:'ti-flag',internal:'ti-lock'};
+  const colorMap={open:'blue',assign:'blue',escalate:'amber',comment:'blue',resolve:'green',status:'blue',ai:'purple',priority:'amber',internal:'red'};
+  if(!items.length){ document.getElementById('d-timeline').innerHTML='<div class="tl-item"><div style="font-size:12px;color:var(--text3)">Sem histórico</div></div>'; return; }
+  document.getElementById('d-timeline').innerHTML=items.map(item=>{
+    const icon=iconMap[item.type]||'ti-point';
+    const color=colorMap[item.type]||'blue';
+    return `<div class="tl-item">
+      <div class="tl-dot ${color}"><i class="ti ${icon}" style="font-size:13px"></i></div>
+      <div class="tl-content">
+        <div class="tl-action">${esc(item.action||'—')}</div>
+        ${item.note?`<div class="tl-note">${esc(item.note)}</div>`:''}
+        <div class="tl-time">${fmtDate(item.created_at)} · ${esc(item.by_name||'—')}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function closeDrawer(){ document.getElementById('drawer').classList.remove('open'); currentTicketId=null; }
+
+function toggleAssign(){
+  const w=document.getElementById('d-assign-wrap');
+  w.style.display=w.style.display==='none'?'block':'none';
+}
+
+function populateAnalystSelect(){
+  const sel=document.getElementById('d-analyst-select');
+  sel.innerHTML='<option value="">Selecionar analista...</option>'+_analysts.map(a=>`<option value="${a.id}">${esc(a.name)} (${a.level})</option>`).join('');
+}
+
+async function doAssign(){
+  const anaId=document.getElementById('d-analyst-select').value;
+  if(!anaId||!currentTicketId) return toast('Selecione um analista','err');
+  try {
+    await req('/tickets/'+currentTicketId+'/assign',{method:'POST',body:JSON.stringify({analyst_id:parseInt(anaId)})});
+    toast('Chamado atribuído com sucesso');
+    openTicket(currentTicketId);
+    if(currentView==='tickets') loadTickets(); else loadDashboard();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+async function doEscalate(nivel){
+  if(!currentTicketId) return;
+  const reason=prompt('Motivo da escalada para '+nivel+':');
+  if(reason===null) return;
+  try {
+    await req('/tickets/'+currentTicketId+'/escalate',{method:'POST',body:JSON.stringify({nivel,reason:reason||'Escalado manualmente'})});
+    toast('Chamado escalado para '+nivel);
+    openTicket(currentTicketId);
+    if(currentView==='tickets') loadTickets(); else loadDashboard();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+async function doComment(){
+  const note=document.getElementById('d-comment').value.trim();
+  if(!note||!currentTicketId) return toast('Digite um comentário','err');
+  try {
+    await req('/tickets/'+currentTicketId+'/comment',{method:'POST',body:JSON.stringify({note,type:'comment'})});
+    document.getElementById('d-comment').value='';
+    toast('Comentário adicionado');
+    openTicket(currentTicketId);
+  } catch(e){ toast(e.message,'err'); }
+}
+
+async function doResolve(){
+  if(!currentTicketId) return;
+  const note=document.getElementById('d-comment').value.trim();
+  if(!confirm('Marcar chamado como resolvido?')) return;
+  try {
+    await req('/tickets/'+currentTicketId+'/resolve',{method:'POST',body:JSON.stringify({note:note||'Chamado resolvido'})});
+    toast('Chamado resolvido com sucesso');
+    closeDrawer();
+    if(currentView==='tickets') loadTickets(); else loadDashboard();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+async function doSetPending(){
+  if(!currentTicketId) return;
+  try {
+    await req('/tickets/'+currentTicketId,{method:'PUT',body:JSON.stringify({status:'Pendente'})});
+    toast('Status alterado para Pendente');
+    openTicket(currentTicketId);
+    if(currentView==='tickets') loadTickets(); else loadDashboard();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+async function doAISuggest(){
+  if(!currentTicketId) return;
+  try {
+    const r=await req('/ai/suggest/'+currentTicketId,{method:'POST'});
+    if(r){
+      document.getElementById('d-ai-suggest-text').textContent=r.suggestion||r.detail||JSON.stringify(r);
+      document.getElementById('d-ai-suggestion').classList.add('show');
+    }
+  } catch(e){ toast('IA indisponível: '+e.message,'err'); }
+}
+
+// ── MODAL: NOVO CHAMADO ──────────────────────────────────────────────────────
+function openModal(){
+  document.getElementById('modal-ticket').classList.add('show');
+  document.getElementById('m-title').value='';
+  document.getElementById('m-desc').value='';
+  document.getElementById('m-ai-panel').classList.remove('show');
+  aiData=null;
+}
+function closeModal(){ document.getElementById('modal-ticket').classList.remove('show'); }
+
+function populateUserSelect(){
+  const sel=document.getElementById('m-user');
+  sel.innerHTML='<option value="">Selecionar usuário...</option>'+_users.map(u=>`<option value="${u.id}">${esc(u.name)} — ${esc(u.department?.name||'—')}</option>`).join('');
+}
+
+function populateCategorySelect(){
+  const sel=document.getElementById('m-category');
+  sel.innerHTML='<option value="">Selecionar...</option>'+_categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+}
+
+function debounceAnalyze(){ clearTimeout(debTimer); debTimer=setTimeout(runAIAnalyze, 700); }
+
+async function runAIAnalyze(){
+  const title=document.getElementById('m-title').value.trim();
+  const desc=document.getElementById('m-desc').value.trim();
+  if(!title&&!desc) return;
+  try {
+    const r=await req('/ai/analyze',{method:'POST',body:JSON.stringify({title,description:desc})});
+    if(!r) return;
+    aiData=r;
+    document.getElementById('m-ai-panel').classList.add('show');
+    document.getElementById('m-ai-conf').textContent='conf: '+(r.confidence||0)+'%';
+    document.getElementById('m-ai-priority').innerHTML=`<span class="badge ${priClass(r.priority)}">${r.priority}</span>`;
+    document.getElementById('m-ai-level').innerHTML=`<span class="badge level">${r.level||'N1'}</span>`;
+    document.getElementById('m-ai-confval').textContent=(r.confidence||0)+'%';
+    document.getElementById('m-ai-just').textContent=r.justification||'—';
+    document.getElementById('m-ai-tags').innerHTML=(r.tags||[]).map(t=>`<span class="ai-tag">${esc(t)}</span>`).join('');
+  } catch(e){ console.warn('AI:', e); }
+}
+
+let acceptedAI=false;
+function acceptAI(){ acceptedAI=true; document.getElementById('m-ai-panel').style.borderColor='var(--green)'; }
+
+async function submitTicket(){
+  const userId   = document.getElementById('m-user').value;
+  const catId    = document.getElementById('m-category').value;
+  const impact   = document.getElementById('m-impact').value;
+  const title    = document.getElementById('m-title').value.trim();
+  const desc     = document.getElementById('m-desc').value.trim();
+  if(!title) return toast('Informe o título','err');
+  if(!userId) return toast('Selecione o solicitante','err');
+  const btn=document.getElementById('m-submit');
+  btn.disabled=true; btn.innerHTML='<div class="spinner"></div> Abrindo...';
+  try {
+    const body={
+      title, description:desc||title,
+      user_id: parseInt(userId),
+      category_id: catId?parseInt(catId):null,
+      impact, level: aiData?.level||'N1',
+      priority: aiData?.priority||'Média',
+      priority_source: acceptedAI&&aiData?'ai':'manual',
+      ai_analysis: acceptedAI&&aiData?aiData:null,
+    };
+    await req('/tickets',{method:'POST',body:JSON.stringify(body)});
+    toast('Chamado aberto com sucesso!');
+    closeModal();
+    if(currentView==='tickets') loadTickets(); else loadDashboard();
+    acceptedAI=false; aiData=null;
+  } catch(e){ toast(e.message,'err'); }
+  finally{ btn.disabled=false; btn.innerHTML='<i class="ti ti-send"></i> Abrir Chamado'; }
+}
+
+// ── SLA ──────────────────────────────────────────────────────────────────────
+async function loadSLA(){
+  const grid=document.getElementById('sla-rules-grid');
+  try {
+    const rules=await req('/sla/rules');
+    if(rules&&rules.length){
+      const priMap={Crítica:{cls:'critica',col:'var(--red)',itil:'P1'},Alta:{cls:'alta',col:'var(--orange)',itil:'P2'},Média:{cls:'media',col:'var(--amber)',itil:'P3'},Baixa:{cls:'baixa',col:'var(--green)',itil:'P4'}};
+      grid.innerHTML=rules.map(r=>{
+        const p=priMap[r.priority]||{cls:'baixa',col:'var(--green)',itil:'P4'};
+        return `<div class="sla-rule-card">
+          <div class="sla-priority-badge ${p.cls}">
+            <div class="dot" style="background:${p.col}"></div>
+            <div class="name" style="color:${p.col}">${r.priority}</div>
+          </div>
+          <div>
+            <div class="sla-rule-name">${p.itil} — ${r.priority}</div>
+            <div class="itil-badge"><i class="ti ti-certificate" style="font-size:12px"></i> ITIL 4 — ${p.itil}</div>
+            <div class="sla-rule-metrics">
+              <div class="sla-metric"><div class="sla-metric-val" style="color:${p.col}">${fmtHours(r.response_hours)}</div><div class="sla-metric-label">1ª Resposta</div></div>
+              <div class="sla-metric"><div class="sla-metric-val" style="color:${p.col}">${fmtHours(r.resolution_hours)}</div><div class="sla-metric-label">Resolução</div></div>
+              <div class="sla-metric"><div class="sla-metric-val" style="color:var(--amber)">${fmtHours(r.escalation_n1_hours)}</div><div class="sla-metric-label">Esc. N1→N2</div></div>
+              <div class="sla-metric"><div class="sla-metric-val" style="color:var(--amber)">${fmtHours(r.escalation_n2_hours)}</div><div class="sla-metric-label">Esc. N2→N3</div></div>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  } catch(e){ grid.innerHTML='<div class="empty"><i class="ti ti-alert-circle" style="color:var(--red)"></i><p>'+e.message+'</p></div>'; }
+
+  try {
+    const atRisk=await req('/sla/at-risk');
+    const el=document.getElementById('sla-atrisk-table');
+    if(!atRisk||!atRisk.length){ el.innerHTML='<div class="empty" style="padding:30px"><i class="ti ti-circle-check" style="color:var(--green)"></i><p>Nenhum chamado em risco de SLA</p></div>'; return; }
+    const rows=atRisk.map(t=>{
+      const slaVal=calcSLAPct(t);
+      const sc=slaClass(slaVal);
+      return `<tr onclick="openTicket(${t.id})"><td class="number">${t.ticket_number}</td><td class="bold">${esc(t.title)}</td><td><span class="badge ${priClass(t.priority)}">${t.priority}</span></td><td><span class="sla-pct ${sc}">${slaVal}%</span></td><td>${fmtDate(t.sla_deadline_at)}</td></tr>`;
+    }).join('');
+    el.innerHTML=`<div class="table-wrapper"><table><thead><tr><th>#</th><th>Título</th><th>Prioridade</th><th>SLA%</th><th>Prazo</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  } catch(e){}
+}
+
+// ── REPORTS ──────────────────────────────────────────────────────────────────
+async function loadReports(){
+  try {
+    const kpis=await req('/reports/kpis');
+    if(kpis){
+      document.getElementById('r-taxa').textContent=kpis.resolution_rate!=null?(kpis.resolution_rate.toFixed(1)+'%'):'—';
+      document.getElementById('r-tma').textContent=fmtHours(kpis.avg_response_hours);
+      document.getElementById('r-tmr').textContent=fmtHours(kpis.avg_resolution_hours);
+      document.getElementById('r-sla').textContent=kpis.sla_compliance!=null?(kpis.sla_compliance.toFixed(1)+'%'):'—';
+    }
+  } catch(e){}
+
+  try {
+    const cats=await req('/reports/by-category');
+    if(cats&&cats.length){
+      const max=cats[0].total||1;
+      const colors=['var(--blue)','var(--purple)','var(--amber)','var(--orange)','var(--green)','var(--red)'];
+      document.getElementById('chart-category').innerHTML=cats.slice(0,6).map((c,i)=>`
+        <div class="chart-bar-row">
+          <div class="chart-bar-label">${esc(c.category||'—')}</div>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round(c.total/max*100)}%;background:${colors[i%colors.length]}"></div></div>
+          <div class="chart-bar-val">${c.total}</div>
+        </div>`).join('');
+    }
+  } catch(e){}
+
+  try {
+    const pris=await req('/reports/by-priority');
+    if(pris&&pris.length){
+      const total=pris.reduce((s,p)=>s+p.total,0)||1;
+      const priColors={Crítica:'var(--red)',Alta:'var(--orange)',Média:'var(--amber)',Baixa:'var(--green)'};
+      let offset=25; const circles=[];
+      const svgParts=pris.map(p=>{
+        const pct=p.total/total*100;
+        const dash=pct+' '+(100-pct);
+        const c=`<circle cx="18" cy="18" r="15.9" fill="none" stroke="${priColors[p.priority]||'var(--blue)'}" stroke-width="3.8" stroke-dasharray="${dash}" stroke-dashoffset="-${offset}" transform="rotate(-90 18 18)"/>`;
+        offset+=pct;
+        return c;
+      }).join('');
+      document.getElementById('donut-svg').innerHTML=`<circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--elevated)" stroke-width="3.8"/>${svgParts}`;
+      document.getElementById('donut-legend').innerHTML=pris.map(p=>`<div class="donut-leg"><div class="donut-dot" style="background:${priColors[p.priority]||'var(--blue)'}"></div>${p.priority} ${Math.round(p.total/total*100)}%</div>`).join('');
+    }
+  } catch(e){}
+
+  try {
+    const anas=await req('/reports/by-analyst');
+    if(anas&&anas.length){
+      const max=anas[0].resolved||1;
+      const colors=['var(--green)','var(--blue)','var(--purple)','var(--amber)'];
+      document.getElementById('chart-analyst').innerHTML=anas.slice(0,5).map((a,i)=>`
+        <div class="chart-bar-row">
+          <div class="chart-bar-label">${esc(a.analyst||'—')}</div>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round((a.resolved||0)/max*100)}%;background:${colors[i%colors.length]}"></div></div>
+          <div class="chart-bar-val">${a.resolved||0}</div>
+        </div>`).join('');
+    }
+  } catch(e){}
+}
+
+async function exportCsv(){
+  try {
+    const r=await fetch(API+'/reports/export?format=csv',{headers:hdrs()});
+    if(!r.ok) throw new Error('Erro '+r.status);
+    const blob=await r.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download='chamados_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+    URL.revokeObjectURL(url);
+    toast('CSV exportado!');
+  } catch(e){ toast(e.message,'err'); }
+}
+
+// ── USUÁRIOS ─────────────────────────────────────────────────────────────────
+async function loadUsers(){
+  const el=document.getElementById('usuarios-table');
+  el.innerHTML='<div class="empty"><i class="ti ti-loader" style="animation:spin 1s linear infinite;font-size:32px"></i></div>';
+  try {
+    _users=await req('/users')||[];
+    if(!_users.length){ el.innerHTML='<div class="empty"><i class="ti ti-users"></i><p>Nenhum usuário cadastrado</p></div>'; return; }
+    const rows=_users.map(u=>`<tr>
+      <td class="bold">${esc(u.name)}</td>
+      <td>${esc(u.email||'—')}</td>
+      <td>${esc(u.department?.name||'—')}</td>
+      <td>${esc(u.phone||'—')}</td>
+      <td style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="editUser(${u.id})"><i class="ti ti-edit"></i></button>
+        <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})"><i class="ti ti-trash"></i></button>
+      </td>
+    </tr>`).join('');
+    el.innerHTML=`<div class="table-wrapper"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Departamento</th><th>Ramal</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  } catch(e){ el.innerHTML='<div class="empty"><i class="ti ti-alert-circle" style="color:var(--red)"></i><p>'+e.message+'</p></div>'; }
+}
+
+function populateDeptSelect(){
+  const sel=document.getElementById('u-dept');
+  sel.innerHTML='<option value="">Selecionar...</option>'+_depts.map(d=>`<option value="${d.id}">${esc(d.name)}</option>`).join('');
+}
+
+function openUserModal(id){
+  editUserId=id||null;
+  document.getElementById('user-modal-title').textContent=id?'Editar Usuário':'Novo Usuário';
+  document.getElementById('u-name').value='';
+  document.getElementById('u-email').value='';
+  document.getElementById('u-phone').value='';
+  document.getElementById('u-dept').value='';
+  if(id){ const u=_users.find(x=>x.id===id); if(u){ document.getElementById('u-name').value=u.name||''; document.getElementById('u-email').value=u.email||''; document.getElementById('u-phone').value=u.phone||''; document.getElementById('u-dept').value=u.department_id||''; }}
+  document.getElementById('modal-user').classList.add('show');
+}
+function closeUserModal(){ document.getElementById('modal-user').classList.remove('show'); }
+
+function editUser(id){ openUserModal(id); }
+
+async function saveUser(){
+  const name=document.getElementById('u-name').value.trim();
+  const email=document.getElementById('u-email').value.trim();
+  const phone=document.getElementById('u-phone').value.trim();
+  const deptId=document.getElementById('u-dept').value;
+  if(!name) return toast('Informe o nome','err');
+  const body={name,email,phone:phone||null,department_id:deptId?parseInt(deptId):null};
+  try {
+    if(editUserId) await req('/users/'+editUserId,{method:'PUT',body:JSON.stringify(body)});
+    else await req('/users',{method:'POST',body:JSON.stringify(body)});
+    toast(editUserId?'Usuário atualizado':'Usuário criado');
+    closeUserModal(); loadUsers(); loadCaches();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+async function deleteUser(id){
+  if(!confirm('Excluir usuário?')) return;
+  try { await req('/users/'+id,{method:'DELETE'}); toast('Usuário excluído'); loadUsers(); }
+  catch(e){ toast(e.message,'err'); }
+}
+
+// ── ANALISTAS ─────────────────────────────────────────────────────────────────
+async function loadAnalysts(){
+  const el=document.getElementById('analistas-table');
+  el.innerHTML='<div class="empty"><i class="ti ti-loader" style="animation:spin 1s linear infinite;font-size:32px"></i></div>';
+  try {
+    _analysts=await req('/analysts')||[];
+    if(!_analysts.length){ el.innerHTML='<div class="empty"><i class="ti ti-user-shield"></i><p>Nenhum analista cadastrado</p></div>'; return; }
+    const rows=_analysts.map(a=>`<tr>
+      <td class="bold">${esc(a.name)}</td>
+      <td>${esc(a.email||'—')}</td>
+      <td><span class="badge level">${a.level||'—'}</span></td>
+      <td><span class="badge ${a.active?'resolvido':'cancelado'}">${a.active?'Ativo':'Inativo'}</span></td>
+      <td style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="editAnalyst(${a.id})"><i class="ti ti-edit"></i></button>
+        <button class="btn btn-danger btn-sm" onclick="deleteAnalyst(${a.id})"><i class="ti ti-trash"></i></button>
+      </td>
+    </tr>`).join('');
+    el.innerHTML=`<div class="table-wrapper"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Nível</th><th>Status</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  } catch(e){ el.innerHTML='<div class="empty"><i class="ti ti-alert-circle" style="color:var(--red)"></i><p>'+e.message+'</p></div>'; }
+}
+
+function populateAnalystFilter(){
+  const sel=document.getElementById('filter-analyst');
+  if(sel) sel.innerHTML='<option value="">Todos os analistas</option>'+_analysts.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join('');
+}
+
+function openAnalystModal(id){
+  editAnalystId=id||null;
+  document.getElementById('analyst-modal-title').textContent=id?'Editar Analista':'Novo Analista';
+  document.getElementById('a-name').value='';
+  document.getElementById('a-email').value='';
+  document.getElementById('a-password').value='';
+  document.getElementById('a-level').value='N1';
+  if(id){ const a=_analysts.find(x=>x.id===id); if(a){ document.getElementById('a-name').value=a.name||''; document.getElementById('a-email').value=a.email||''; document.getElementById('a-level').value=a.level||'N1'; }}
+  document.getElementById('modal-analyst').classList.add('show');
+}
+function closeAnalystModal(){ document.getElementById('modal-analyst').classList.remove('show'); }
+
+function editAnalyst(id){ openAnalystModal(id); }
+
+async function saveAnalyst(){
+  const name=document.getElementById('a-name').value.trim();
+  const email=document.getElementById('a-email').value.trim();
+  const password=document.getElementById('a-password').value;
+  const level=document.getElementById('a-level').value;
+  if(!name||!email) return toast('Preencha nome e e-mail','err');
+  const body={name,email,level};
+  if(password) body.password=password;
+  try {
+    if(editAnalystId) await req('/analysts/'+editAnalystId,{method:'PUT',body:JSON.stringify(body)});
+    else { if(!password) return toast('Informe a senha','err'); await req('/analysts',{method:'POST',body:JSON.stringify(body)}); }
+    toast(editAnalystId?'Analista atualizado':'Analista criado');
+    closeAnalystModal(); loadAnalysts(); loadCaches();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+async function deleteAnalyst(id){
+  if(!confirm('Excluir analista?')) return;
+  try { await req('/analysts/'+id,{method:'DELETE'}); toast('Analista excluído'); loadAnalysts(); }
+  catch(e){ toast(e.message,'err'); }
+}
+
+// ── CATEGORIAS ───────────────────────────────────────────────────────────────
+async function loadCategories(){
+  const el=document.getElementById('categorias-table');
+  el.innerHTML='<div class="empty"><i class="ti ti-loader" style="animation:spin 1s linear infinite;font-size:32px"></i></div>';
+  try {
+    _categories=await req('/categories')||[];
+    if(!_categories.length){ el.innerHTML='<div class="empty"><i class="ti ti-tags"></i><p>Nenhuma categoria cadastrada</p></div>'; return; }
+    const rows=_categories.map(c=>`<tr>
+      <td class="bold">${esc(c.name)}</td>
+      <td>${esc(c.description||'—')}</td>
+      <td style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="editCategory(${c.id})"><i class="ti ti-edit"></i></button>
+        <button class="btn btn-danger btn-sm" onclick="deleteCategory(${c.id})"><i class="ti ti-trash"></i></button>
+      </td>
+    </tr>`).join('');
+    el.innerHTML=`<div class="table-wrapper"><table><thead><tr><th>Nome</th><th>Descrição</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  } catch(e){ el.innerHTML='<div class="empty"><i class="ti ti-alert-circle" style="color:var(--red)"></i><p>'+e.message+'</p></div>'; }
+}
+
+function openCategoryModal(id){
+  editCatId=id||null;
+  document.getElementById('cat-modal-title').textContent=id?'Editar Categoria':'Nova Categoria';
+  document.getElementById('c-name').value='';
+  document.getElementById('c-desc').value='';
+  if(id){ const c=_categories.find(x=>x.id===id); if(c){ document.getElementById('c-name').value=c.name||''; document.getElementById('c-desc').value=c.description||''; }}
+  document.getElementById('modal-category').classList.add('show');
+}
+function closeCategoryModal(){ document.getElementById('modal-category').classList.remove('show'); }
+
+function editCategory(id){ openCategoryModal(id); }
+
+async function saveCategory(){
+  const name=document.getElementById('c-name').value.trim();
+  const desc=document.getElementById('c-desc').value.trim();
+  if(!name) return toast('Informe o nome','err');
+  const body={name,description:desc||null};
+  try {
+    if(editCatId) await req('/categories/'+editCatId,{method:'PUT',body:JSON.stringify(body)});
+    else await req('/categories',{method:'POST',body:JSON.stringify(body)});
+    toast(editCatId?'Categoria atualizada':'Categoria criada');
+    closeCategoryModal(); loadCategories(); loadCaches();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+async function deleteCategory(id){
+  if(!confirm('Excluir categoria?')) return;
+  try { await req('/categories/'+id,{method:'DELETE'}); toast('Categoria excluída'); loadCategories(); }
+  catch(e){ toast(e.message,'err'); }
+}
+
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+function updateBranding(){
+  const name=document.getElementById('cfg-name').value;
+  const sub=document.getElementById('cfg-sub').value;
+  document.getElementById('logo-text').textContent=name;
+  document.getElementById('logo-sub').textContent=sub;
+  localStorage.setItem('hd_brand',JSON.stringify({name,sub}));
+}
+
+function applyTheme(color, el){
+  document.querySelectorAll('.color-dot').forEach(x=>x.style.border='2px solid transparent');
+  if(el) el.style.border='2px solid #fff';
+  document.documentElement.style.setProperty('--blue',color);
+  document.documentElement.style.setProperty('--accent',color);
+  localStorage.setItem('hd_color',color);
+}
+
+(function applyStoredSettings(){
+  try {
+    const b=JSON.parse(localStorage.getItem('hd_brand')||'{}');
+    if(b.name){ document.getElementById('logo-text').textContent=b.name; document.getElementById('cfg-name').value=b.name; }
+    if(b.sub){ document.getElementById('logo-sub').textContent=b.sub; document.getElementById('cfg-sub').value=b.sub; }
+    const c=localStorage.getItem('hd_color');
+    if(c){ document.documentElement.style.setProperty('--blue',c); document.documentElement.style.setProperty('--accent',c); }
+  } catch(e){}
+})();
+
+// ── ESCAPE HTML ───────────────────────────────────────────────────────────────
+function esc(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── CLOSE MODALS ON BACKDROP CLICK ───────────────────────────────────────────
+['modal-ticket','modal-user','modal-analyst','modal-category'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('show'); });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Pesquisa de Satisfação — TI HelpDesk</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0f1a;--surface:#111827;--card:#161e2e;--elevated:#1e2a40;
+  --border:rgba(255,255,255,0.08);--text:#e2e8f0;--text2:#94a3b8;--text3:#4b5a72;
+  --blue:#3b82f6;--green:#22c55e;--red:#ef4444;--amber:#eab308;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);
+     min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(59,130,246,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(59,130,246,.03) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;}
+
+.wrap{width:100%;max-width:520px;position:relative;z-index:1;}
+
+/* Header */
+.brand{text-align:center;margin-bottom:28px;}
+.brand-icon{width:52px;height:52px;background:linear-gradient(135deg,var(--blue),#1d4ed8);
+  border-radius:14px;display:inline-flex;align-items:center;justify-content:center;
+  font-size:24px;margin-bottom:12px;box-shadow:0 8px 24px rgba(59,130,246,.3);}
+.brand-name{font-size:20px;font-weight:800;letter-spacing:-.4px;}
+.brand-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+
+/* Card */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:28px;box-shadow:0 24px 64px rgba(0,0,0,.4);}
+.card-title{font-size:17px;font-weight:700;margin-bottom:6px;}
+.card-sub{font-size:13px;color:var(--text2);margin-bottom:20px;}
+
+/* Ticket info */
+.ticket-info{background:var(--elevated);border-radius:10px;padding:14px 16px;margin-bottom:20px;
+  border:1px solid var(--border);}
+.ticket-num{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;
+  margin-bottom:4px;}
+.ticket-title{font-size:14px;font-weight:600;color:var(--text);}
+
+/* Resolved question */
+.section-label{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;
+  letter-spacing:.07em;margin-bottom:10px;}
+.resolved-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.resolved-btn{padding:14px;border-radius:10px;border:1.5px solid var(--border);
+  background:var(--elevated);cursor:pointer;transition:all .15s;text-align:center;
+  font-family:inherit;font-size:14px;font-weight:600;color:var(--text2);}
+.resolved-btn:hover{border-color:rgba(59,130,246,.4);color:var(--text);}
+.resolved-btn.selected-yes{background:rgba(34,197,94,.15);border-color:#22c55e;color:#22c55e;}
+.resolved-btn.selected-no{background:rgba(239,68,68,.15);border-color:#ef4444;color:#ef4444;}
+.btn-emoji{font-size:22px;display:block;margin-bottom:4px;}
+
+/* Stars */
+.stars-row{display:flex;gap:8px;margin-bottom:20px;}
+.star{width:44px;height:44px;font-size:24px;cursor:pointer;
+  border:none;background:none;border-radius:8px;transition:transform .1s;
+  display:flex;align-items:center;justify-content:center;}
+.star:hover,.star.lit{transform:scale(1.15);}
+.star .s{filter:grayscale(1);transition:filter .15s;}
+.star.lit .s,.star:hover .s{filter:none;}
+
+/* Labels de nota */
+.star-labels{display:flex;justify-content:space-between;
+  font-size:11px;color:var(--text3);margin-top:-12px;margin-bottom:16px;}
+
+/* Textarea */
+.comment-area{width:100%;background:var(--elevated);border:1.5px solid var(--border);
+  border-radius:10px;padding:11px 14px;color:var(--text);font-size:14px;font-family:inherit;
+  outline:none;resize:vertical;min-height:80px;transition:border-color .2s;}
+.comment-area:focus{border-color:var(--blue);}
+.comment-area::placeholder{color:var(--text3);}
+
+/* Submit */
+.btn-submit{width:100%;background:var(--blue);color:#fff;border:none;border-radius:10px;
+  padding:13px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;
+  margin-top:20px;transition:background .2s;display:flex;align-items:center;
+  justify-content:center;gap:8px;}
+.btn-submit:hover{background:#2563eb;}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed;}
+
+/* States */
+.loading-state,.success-state,.error-state{display:none;text-align:center;padding:20px 0;}
+.success-state{display:none;}
+.success-icon{font-size:56px;margin-bottom:16px;}
+.success-title{font-size:20px;font-weight:700;margin-bottom:8px;}
+.success-sub{font-size:14px;color:var(--text2);}
+
+/* Alert */
+.alert{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none;}
+.alert-warn{background:rgba(234,179,8,.12);border:1px solid rgba(234,179,8,.3);color:#fde047;}
+.alert-info{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);color:#93c5fd;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.wrap{animation:fadeUp .4s ease;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="brand">
+    <div class="brand-icon">⭐</div>
+    <div class="brand-name">Pesquisa de Satisfação</div>
+    <div class="brand-sub">TI HelpDesk — Seu feedback é muito importante</div>
+  </div>
+
+  <!-- Card principal -->
+  <div class="card" id="survey-card">
+
+    <!-- Loading -->
+    <div class="loading-state" id="loading-state">
+      <div style="font-size:40px;margin-bottom:12px;">⏳</div>
+      <p style="color:var(--text2);">Carregando pesquisa...</p>
+    </div>
+
+    <!-- Formulário -->
+    <div id="form-state">
+      <div class="card-title">Como foi o atendimento?</div>
+      <div class="card-sub">Avalie a resolução do seu chamado em menos de 1 minuto.</div>
+
+      <div class="ticket-info" id="ticket-info">
+        <div class="ticket-num" id="ticket-num">Carregando...</div>
+        <div class="ticket-title" id="ticket-title">—</div>
+      </div>
+
+      <div class="alert alert-info" id="alert-answered">
+        ✅ Você já respondeu esta pesquisa. Obrigado pelo seu feedback!
+      </div>
+
+      <!-- O problema foi resolvido? -->
+      <div class="section-label">O seu problema foi resolvido?</div>
+      <div class="resolved-btns">
+        <button class="resolved-btn" id="btn-yes" onclick="selectResolved(true)">
+          <span class="btn-emoji">✅</span>
+          Sim, foi resolvido
+        </button>
+        <button class="resolved-btn" id="btn-no" onclick="selectResolved(false)">
+          <span class="btn-emoji">❌</span>
+          Não, ainda tenho o problema
+        </button>
+      </div>
+
+      <div class="alert alert-warn" id="alert-reopen">
+        ⚠ Ao enviar com "Não resolvido", o chamado será <strong>reaberto automaticamente</strong>
+        e nossa equipe entrará em contato novamente.
+      </div>
+
+      <!-- Nota de satisfação -->
+      <div class="section-label" style="margin-top:4px;">
+        Nota geral do atendimento
+      </div>
+      <div class="stars-row" id="stars-row">
+        <button class="star" data-v="1" onclick="setScore(1)" title="1 — Péssimo">
+          <span class="s">⭐</span>
+        </button>
+        <button class="star" data-v="2" onclick="setScore(2)" title="2 — Ruim">
+          <span class="s">⭐</span>
+        </button>
+        <button class="star" data-v="3" onclick="setScore(3)" title="3 — Regular">
+          <span class="s">⭐</span>
+        </button>
+        <button class="star" data-v="4" onclick="setScore(4)" title="4 — Bom">
+          <span class="s">⭐</span>
+        </button>
+        <button class="star" data-v="5" onclick="setScore(5)" title="5 — Excelente">
+          <span class="s">⭐</span>
+        </button>
+      </div>
+      <div class="star-labels">
+        <span>Péssimo</span>
+        <span>Regular</span>
+        <span>Excelente</span>
+      </div>
+      <div id="score-label" style="font-size:13px;color:var(--text2);min-height:18px;
+           margin-bottom:16px;text-align:center;"></div>
+
+      <!-- Comentário -->
+      <div class="section-label">Comentário (opcional)</div>
+      <textarea class="comment-area" id="comment" placeholder="Descreva sua experiência ou deixe uma sugestão..."
+                maxlength="1000"></textarea>
+
+      <button class="btn-submit" id="btn-submit" onclick="submitSurvey()" disabled>
+        Enviar Avaliação
+      </button>
+    </div>
+
+    <!-- Sucesso resolvido -->
+    <div class="success-state" id="success-resolved">
+      <div class="success-icon">🎉</div>
+      <div class="success-title" style="color:var(--green);">
+        Que ótimo! Obrigado pelo seu feedback!
+      </div>
+      <p class="success-sub" style="margin-top:8px;">
+        Sua avaliação foi registrada com sucesso.<br>
+        O chamado foi <strong style="color:var(--green);">fechado definitivamente</strong>.
+      </p>
+      <p class="success-sub" style="margin-top:16px;font-size:12px;color:var(--text3);">
+        Em caso de novos problemas, abra um chamado pelo portal ou chatbot.
+      </p>
+    </div>
+
+    <!-- Chamado reaberto -->
+    <div class="success-state" id="success-reopened">
+      <div class="success-icon">🔄</div>
+      <div class="success-title" style="color:var(--amber);">
+        Chamado reaberto com sucesso
+      </div>
+      <p class="success-sub" style="margin-top:8px;">
+        Lamentamos que o problema não tenha sido resolvido.<br>
+        Sua avaliação foi registrada e nossa equipe entrará<br>
+        em contato em breve para uma nova tentativa.
+      </p>
+    </div>
+
+    <!-- Erro -->
+    <div class="error-state" id="error-state">
+      <div class="success-icon">😕</div>
+      <div class="success-title" style="color:var(--red);">Link inválido ou expirado</div>
+      <p class="success-sub">Esta pesquisa não foi encontrada.<br>
+        Verifique o link recebido por e-mail.</p>
+    </div>
+
+  </div><!-- /card -->
+
+  <div style="text-align:center;margin-top:20px;font-size:11px;color:var(--text3);">
+    TI HelpDesk v2.0 &nbsp;·&nbsp; Powered by FastAPI + Claude AI
+  </div>
+</div>
+
+<script>
+const token = new URLSearchParams(location.search).get('token');
+let currentScore = 0;
+let resolvedConfirmed = null;
+
+const SCORE_LABELS = {
+  1: '😞 Péssimo — atendimento muito abaixo do esperado',
+  2: '😕 Ruim — precisa melhorar',
+  3: '😐 Regular — atendimento aceitável',
+  4: '😊 Bom — fiquei satisfeito',
+  5: '🤩 Excelente — atendimento perfeito!'
+};
+
+function getAPI() {
+  if (location.port === '5500' || location.port === '8080' || location.protocol === 'file:') {
+    return 'http://localhost:8000/api/v1';
+  }
+  return '/api/v1';
+}
+
+function show(id) {
+  ['loading-state','form-state','success-resolved','success-reopened','error-state']
+    .forEach(s => {
+      const el = document.getElementById(s);
+      if (el) el.style.display = s === id ? 'block' : 'none';
+    });
+}
+
+async function loadSurvey() {
+  if (!token) { show('error-state'); return; }
+  show('loading-state');
+  try {
+    const res = await fetch(`${getAPI()}/survey/${token}`);
+    if (!res.ok) { show('error-state'); return; }
+    const data = await res.json();
+
+    document.getElementById('ticket-num').textContent   = data.ticket_number;
+    document.getElementById('ticket-title').textContent = data.ticket_title;
+    document.title = `Pesquisa — ${data.ticket_number}`;
+
+    if (data.already_answered) {
+      document.getElementById('alert-answered').style.display = 'block';
+      document.getElementById('btn-submit').disabled = true;
+      document.getElementById('btn-yes').disabled    = true;
+      document.getElementById('btn-no').disabled     = true;
+      document.querySelectorAll('.star').forEach(s => s.disabled = true);
+      document.getElementById('comment').disabled    = true;
+    }
+    show('form-state');
+  } catch(e) {
+    show('error-state');
+  }
+}
+
+function selectResolved(yes) {
+  resolvedConfirmed = yes;
+  document.getElementById('btn-yes').className = 'resolved-btn' + (yes ? ' selected-yes' : '');
+  document.getElementById('btn-no').className  = 'resolved-btn' + (!yes ? ' selected-no' : '');
+  document.getElementById('alert-reopen').style.display = yes ? 'none' : 'block';
+  checkReady();
+}
+
+function setScore(n) {
+  currentScore = n;
+  document.querySelectorAll('.star').forEach(star => {
+    star.classList.toggle('lit', parseInt(star.dataset.v) <= n);
+  });
+  document.getElementById('score-label').textContent = SCORE_LABELS[n] || '';
+  checkReady();
+}
+
+function checkReady() {
+  const ok = currentScore > 0 && resolvedConfirmed !== null;
+  document.getElementById('btn-submit').disabled = !ok;
+}
+
+async function submitSurvey() {
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  const payload = {
+    score: currentScore,
+    comment: document.getElementById('comment').value.trim() || null,
+    resolved_confirmed: resolvedConfirmed
+  };
+
+  try {
+    const res = await fetch(`${getAPI()}/survey/${token}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      alert(err.detail || 'Erro ao enviar pesquisa');
+      btn.disabled = false;
+      btn.textContent = 'Enviar Avaliação';
+      return;
+    }
+    // Mostrar tela de resultado
+    show(resolvedConfirmed ? 'success-resolved' : 'success-reopened');
+  } catch(e) {
+    alert('Erro de conexão. Tente novamente.');
+    btn.disabled = false;
+    btn.textContent = 'Enviar Avaliação';
+  }
+}
+
+loadSurvey();
+</script>
+</body>
+</html>

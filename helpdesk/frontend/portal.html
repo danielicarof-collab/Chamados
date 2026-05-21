@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Portal de Chamados — TI HelpDesk</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0f1a;--surface:#111827;--card:#161e2e;--elevated:#1e2a40;
+  --border:rgba(255,255,255,0.08);--text:#e2e8f0;--text2:#94a3b8;--text3:#4b5a72;
+  --blue:#3b82f6;--blue-dim:rgba(59,130,246,.15);
+  --green:#22c55e;--red:#ef4444;--amber:#eab308;--orange:#f97316;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(59,130,246,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(59,130,246,.03) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0;}
+
+/* ── Topbar ── */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(17,24,39,.9);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;height:60px;}
+.topbar-brand{display:flex;align-items:center;gap:12px;}
+.topbar-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--blue),#1d4ed8);
+  border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.topbar-name{font-size:16px;font-weight:800;letter-spacing:-.4px;}
+.topbar-sub{font-size:11px;color:var(--text2);}
+.user-info{display:flex;align-items:center;gap:10px;}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--elevated);
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+  border:1px solid var(--border);}
+.user-name-label{font-size:13px;font-weight:600;}
+.btn-logout{background:none;border:1px solid var(--border);color:var(--text2);
+  padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;
+  transition:all .15s;}
+.btn-logout:hover{border-color:rgba(239,68,68,.4);color:var(--red);}
+
+/* ── Main ── */
+.main{padding:80px 24px 40px;max-width:900px;margin:0 auto;position:relative;z-index:1;}
+
+/* ── Views ── */
+.view{display:none;}
+.view.active{display:block;}
+
+/* ── Login screen ── */
+.login-wrap{max-width:400px;margin:0 auto;padding-top:60px;}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:32px;box-shadow:0 24px 64px rgba(0,0,0,.4);}
+.login-brand{text-align:center;margin-bottom:28px;}
+.login-icon{width:52px;height:52px;background:linear-gradient(135deg,var(--blue),#1d4ed8);
+  border-radius:14px;display:inline-flex;align-items:center;justify-content:center;
+  font-size:24px;margin-bottom:12px;box-shadow:0 8px 24px rgba(59,130,246,.3);}
+.login-title{font-size:20px;font-weight:800;}
+.login-sub{font-size:13px;color:var(--text2);margin-top:3px;}
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-size:11px;font-weight:600;color:var(--text2);
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;}
+.form-input{width:100%;background:var(--elevated);border:1.5px solid var(--border);
+  border-radius:10px;padding:11px 14px;color:var(--text);font-size:14px;font-family:inherit;
+  outline:none;transition:border-color .2s;}
+.form-input:focus{border-color:var(--blue);}
+.form-input::placeholder{color:var(--text3);}
+.btn-primary{width:100%;background:var(--blue);color:#fff;border:none;border-radius:10px;
+  padding:13px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;
+  transition:background .2s;margin-top:4px;}
+.btn-primary:hover{background:#2563eb;}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;}
+.error-box{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);
+  border-radius:8px;padding:10px 14px;font-size:13px;color:#fca5a5;
+  margin-bottom:14px;display:none;}
+
+/* ── Dashboard header ── */
+.page-title{font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:-.4px;}
+.page-sub{font-size:14px;color:var(--text2);margin-bottom:24px;}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:6px;margin-bottom:20px;border-bottom:1px solid var(--border);
+  padding-bottom:0;}
+.tab-btn{background:none;border:none;color:var(--text2);padding:8px 16px;
+  font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s;}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);}
+.tab-btn:hover{color:var(--text);}
+
+/* ── Stats row ── */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.stat-val{font-size:26px;font-weight:800;letter-spacing:-.5px;}
+.stat-label{font-size:12px;color:var(--text2);margin-top:2px;}
+
+/* ── Ticket list ── */
+.ticket-item{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:16px;margin-bottom:10px;cursor:pointer;transition:all .15s;}
+.ticket-item:hover{border-color:rgba(59,130,246,.3);background:var(--elevated);}
+.ticket-item-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.ticket-num-badge{font-size:12px;font-weight:700;color:var(--blue);}
+.ticket-item-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.ticket-item-meta{display:flex;gap:8px;flex-wrap:wrap;}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;
+  padding:2px 8px;border-radius:12px;}
+.badge-blue{background:rgba(59,130,246,.15);color:#60a5fa;}
+.badge-green{background:rgba(34,197,94,.15);color:#4ade80;}
+.badge-red{background:rgba(239,68,68,.15);color:#f87171;}
+.badge-amber{background:rgba(234,179,8,.15);color:#fbbf24;}
+.badge-orange{background:rgba(249,115,22,.15);color:#fb923c;}
+.badge-gray{background:rgba(100,116,139,.15);color:#94a3b8;}
+.badge-purple{background:rgba(168,85,247,.15);color:#c084fc;}
+
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3);}
+.empty-icon{font-size:48px;margin-bottom:12px;}
+
+/* ── New ticket form ── */
+.new-ticket-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;}
+.new-ticket-card h3{font-size:16px;font-weight:700;margin-bottom:16px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+textarea.form-input{resize:vertical;min-height:80px;}
+select.form-input option{background:var(--card);color:var(--text);}
+.btn-submit-ticket{background:var(--blue);color:#fff;border:none;border-radius:10px;
+  padding:12px 24px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;
+  transition:background .2s;margin-top:8px;}
+.btn-submit-ticket:hover{background:#2563eb;}
+.btn-submit-ticket:disabled{opacity:.6;cursor:not-allowed;}
+.success-banner{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);
+  border-radius:10px;padding:14px 16px;font-size:14px;color:#4ade80;margin-bottom:16px;
+  display:none;}
+
+/* ── Ticket detail modal ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:200;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  width:100%;max-width:600px;max-height:85vh;overflow-y:auto;}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;
+  background:var(--card);}
+.modal-header h3{font-size:15px;font-weight:700;}
+.btn-close{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;
+  padding:4px;line-height:1;}
+.modal-body{padding:20px 24px;}
+.timeline-item{display:flex;gap:12px;margin-bottom:14px;}
+.tl-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:14px;flex-shrink:0;}
+.tl-icon-blue{background:rgba(59,130,246,.15);}
+.tl-icon-green{background:rgba(34,197,94,.15);}
+.tl-icon-purple{background:rgba(168,85,247,.15);}
+.tl-icon-orange{background:rgba(249,115,22,.15);}
+.tl-content{}
+.tl-action{font-size:13px;font-weight:600;color:var(--text);}
+.tl-note{font-size:12px;color:var(--text2);margin-top:2px;}
+.tl-time{font-size:11px;color:var(--text3);margin-top:2px;}
+
+/* SLA bar */
+.sla-bar-wrap{margin:12px 0;}
+.sla-bar-bg{background:var(--elevated);border-radius:4px;height:8px;overflow:hidden;}
+.sla-bar-fill{height:100%;border-radius:4px;transition:width .3s;}
+.sla-bar-green{background:var(--green);}
+.sla-bar-amber{background:var(--amber);}
+.sla-bar-red{background:var(--red);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.view.active{animation:fadeUp .25s ease;}
+</style>
+</head>
+<body>
+
+<!-- Topbar (visível apenas quando logado) -->
+<div class="topbar" id="topbar" style="display:none;">
+  <div class="topbar-brand">
+    <div class="topbar-icon">🎫</div>
+    <div>
+      <div class="topbar-name">Portal de Chamados</div>
+      <div class="topbar-sub">TI HelpDesk — Autoatendimento</div>
+    </div>
+  </div>
+  <div class="user-info">
+    <div class="avatar">👤</div>
+    <div>
+      <div class="user-name-label" id="user-name-label">—</div>
+      <div style="font-size:11px;color:var(--text3);" id="user-dept-label">—</div>
+    </div>
+    <button class="btn-logout" onclick="logout()">Sair</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ── View: Login ── -->
+  <div class="view active" id="view-login">
+    <div class="login-wrap">
+      <div class="login-card">
+        <div class="login-brand">
+          <div class="login-icon">🎫</div>
+          <div class="login-title">Portal de Chamados</div>
+          <div class="login-sub">Acesse para abrir e acompanhar seus chamados</div>
+        </div>
+        <div class="error-box" id="login-error"></div>
+        <div class="form-group">
+          <label>E-mail corporativo</label>
+          <input type="email" class="form-input" id="login-email"
+                 placeholder="seu@empresa.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label>Senha</label>
+          <input type="password" class="form-input" id="login-password"
+                 placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="btn-primary" id="btn-login-user" onclick="doLogin()">
+          Entrar no Portal
+        </button>
+        <p style="text-align:center;margin-top:14px;font-size:12px;color:var(--text3);">
+          Problemas para acessar? Contate a equipe de TI.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── View: Dashboard ── -->
+  <div class="view" id="view-dashboard">
+    <div class="page-title" id="dash-greeting">Olá! 👋</div>
+    <div class="page-sub">Acompanhe e gerencie seus chamados de TI</div>
+
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card">
+        <div class="stat-val" id="stat-total" style="color:var(--blue);">—</div>
+        <div class="stat-label">Total de chamados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-open" style="color:var(--amber);">—</div>
+        <div class="stat-label">Em aberto</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-done" style="color:var(--green);">—</div>
+        <div class="stat-label">Resolvidos</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('all')">Todos</button>
+      <button class="tab-btn" onclick="switchTab('open')">Em aberto</button>
+      <button class="tab-btn" onclick="switchTab('resolved')">Resolvidos</button>
+      <button class="tab-btn" onclick="openView('view-new')">+ Abrir chamado</button>
+    </div>
+
+    <div id="ticket-list-wrap">
+      <div class="empty-state"><div class="empty-icon">⏳</div><p>Carregando...</p></div>
+    </div>
+  </div>
+
+  <!-- ── View: Novo Chamado ── -->
+  <div class="view" id="view-new">
+    <div style="margin-bottom:16px;">
+      <button onclick="openView('view-dashboard')"
+              style="background:none;border:none;color:var(--text2);cursor:pointer;
+                     font-size:13px;display:flex;align-items:center;gap:6px;font-family:inherit;">
+        ← Voltar para meus chamados
+      </button>
+    </div>
+    <div class="new-ticket-card">
+      <h3>🎫 Abrir Novo Chamado</h3>
+      <div class="success-banner" id="ticket-success">
+        ✅ <span id="ticket-success-msg">Chamado aberto com sucesso!</span>
+      </div>
+      <div class="form-group">
+        <label>Título *</label>
+        <input type="text" class="form-input" id="new-title"
+               placeholder="Descreva o problema em uma linha" maxlength="200">
+      </div>
+      <div class="form-group">
+        <label>Descrição detalhada *</label>
+        <textarea class="form-input" id="new-description"
+                  placeholder="Descreva o problema com o máximo de detalhes possível&#10;Ex.: desde quando ocorre, quais erros aparecem, o que já tentou fazer..." rows="5"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Categoria</label>
+          <select class="form-input" id="new-category">
+            <option value="">Selecione a categoria</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Impacto no trabalho</label>
+          <select class="form-input" id="new-impact">
+            <option value="">Selecione o impacto</option>
+            <option value="Alto — não consigo trabalhar">Alto — não consigo trabalhar</option>
+            <option value="Médio — trabalho com dificuldades">Médio — trabalho com dificuldades</option>
+            <option value="Baixo — impacto mínimo">Baixo — impacto mínimo</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Equipamento / Sistema afetado</label>
+        <input type="text" class="form-input" id="new-equipment"
+               placeholder="Ex.: Notebook Dell Latitude, Teams, SAP, impressora HP">
+      </div>
+      <button class="btn-submit-ticket" id="btn-create-ticket" onclick="createTicket()">
+        Abrir Chamado
+      </button>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ── Modal de detalhes do chamado ── -->
+<div class="modal-overlay" id="ticket-modal" onclick="closeModal(event)">
+  <div class="modal" id="modal-content">
+    <div class="modal-header">
+      <div>
+        <div style="font-size:12px;color:var(--blue);font-weight:700;" id="modal-num">—</div>
+        <h3 id="modal-title">—</h3>
+      </div>
+      <button class="btn-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <!-- preenchido por JS -->
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = (() => {
+  if (location.port === '5500' || location.port === '8080' || location.protocol === 'file:') {
+    return 'http://localhost:8000/api/v1';
+  }
+  return '/api/v1';
+})();
+
+let userToken = localStorage.getItem('portal_token');
+let currentUser = JSON.parse(localStorage.getItem('portal_user') || 'null');
+let allTickets = [];
+let currentFilter = 'all';
+
+const STATUS_BADGES = {
+  'Aberto':        ['badge-amber',  '⚪ Aberto'],
+  'Em andamento':  ['badge-blue',   '🔵 Em andamento'],
+  'Pendente':      ['badge-orange', '🟠 Pendente'],
+  'Resolvido':     ['badge-green',  '✅ Resolvido'],
+  'Fechado':       ['badge-gray',   '⬛ Fechado'],
+  'Cancelado':     ['badge-gray',   '✖ Cancelado'],
+  'Reaberto':      ['badge-orange', '🔄 Reaberto'],
+};
+const PRIORITY_BADGES = {
+  'Crítica': ['badge-red',    '🔴 Crítica'],
+  'Alta':    ['badge-orange', '🟠 Alta'],
+  'Média':   ['badge-amber',  '🟡 Média'],
+  'Baixa':   ['badge-green',  '🟢 Baixa'],
+};
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+
+function openView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+async function doLogin() {
+  const email    = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const btn      = document.getElementById('btn-login-user');
+  const errBox   = document.getElementById('login-error');
+
+  errBox.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Entrando...';
+
+  try {
+    const res = await fetch(`${API_BASE}/auth/user/login`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email, password}),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      errBox.textContent = data.detail || 'Falha no login';
+      errBox.style.display = 'block';
+      return;
+    }
+    userToken = data.access_token;
+    currentUser = data.user;
+    localStorage.setItem('portal_token', userToken);
+    localStorage.setItem('portal_user', JSON.stringify(currentUser));
+    initDashboard();
+  } catch(e) {
+    errBox.textContent = 'Erro de conexão. Tente novamente.';
+    errBox.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Entrar no Portal';
+  }
+}
+
+function logout() {
+  localStorage.removeItem('portal_token');
+  localStorage.removeItem('portal_user');
+  userToken = null; currentUser = null; allTickets = [];
+  document.getElementById('topbar').style.display = 'none';
+  openView('view-login');
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+
+async function initDashboard() {
+  document.getElementById('topbar').style.display = 'flex';
+  document.getElementById('user-name-label').textContent = currentUser.name;
+  document.getElementById('user-dept-label').textContent =
+    currentUser.department?.name || 'Sem departamento';
+  document.getElementById('dash-greeting').textContent =
+    `Olá, ${currentUser.name.split(' ')[0]}! 👋`;
+
+  openView('view-dashboard');
+  await loadCategories();
+  await loadTickets();
+}
+
+async function loadTickets() {
+  try {
+    const res = await fetch(`${API_BASE}/portal/tickets?per_page=50`, {
+      headers: {'Authorization': `Bearer ${userToken}`},
+    });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    allTickets = data.items || [];
+    renderStats();
+    renderTicketList(currentFilter);
+  } catch(e) {
+    document.getElementById('ticket-list-wrap').innerHTML =
+      '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Erro ao carregar chamados</p></div>';
+  }
+}
+
+function renderStats() {
+  const open   = allTickets.filter(t => !['Resolvido','Fechado','Cancelado'].includes(t.status)).length;
+  const done   = allTickets.filter(t => ['Resolvido','Fechado'].includes(t.status)).length;
+  document.getElementById('stat-total').textContent = allTickets.length;
+  document.getElementById('stat-open').textContent  = open;
+  document.getElementById('stat-done').textContent  = done;
+}
+
+function switchTab(filter) {
+  currentFilter = filter;
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['all','open','resolved'][i] === filter);
+  });
+  renderTicketList(filter);
+}
+
+function renderTicketList(filter) {
+  const wrap = document.getElementById('ticket-list-wrap');
+  let items = allTickets;
+  if (filter === 'open')     items = allTickets.filter(t => !['Resolvido','Fechado','Cancelado'].includes(t.status));
+  if (filter === 'resolved') items = allTickets.filter(t => ['Resolvido','Fechado'].includes(t.status));
+
+  if (!items.length) {
+    wrap.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">${filter === 'open' ? '🎉' : '📋'}</div>
+      <p>${filter === 'open' ? 'Nenhum chamado em aberto!' : 'Nenhum chamado encontrado'}</p>
+    </div>`;
+    return;
+  }
+
+  wrap.innerHTML = items.map(t => {
+    const [sBadge, sLabel] = STATUS_BADGES[t.status] || ['badge-gray', t.status];
+    const [pBadge, pLabel] = PRIORITY_BADGES[t.priority] || ['badge-gray', t.priority];
+    const sla = t.sla_percentage;
+    const slaClass = sla >= 100 ? 'sla-bar-red' : sla >= 70 ? 'sla-bar-amber' : 'sla-bar-green';
+    const created = new Date(t.created_at).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'2-digit'});
+    return `
+    <div class="ticket-item" onclick="showTicket(${t.id})">
+      <div class="ticket-item-head">
+        <span class="ticket-num-badge">${t.ticket_number}</span>
+        <span style="font-size:11px;color:var(--text3);">${created}</span>
+      </div>
+      <div class="ticket-item-title">${t.title}</div>
+      <div class="ticket-item-meta">
+        <span class="badge ${sBadge}">${sLabel}</span>
+        <span class="badge ${pBadge}">${pLabel}</span>
+        <span class="badge badge-gray">🔧 ${t.level}</span>
+        ${t.analyst ? `<span class="badge badge-blue">👤 ${t.analyst.name}</span>` : ''}
+      </div>
+      ${sla > 0 ? `<div class="sla-bar-wrap">
+        <div class="sla-bar-bg"><div class="sla-bar-fill ${slaClass}" style="width:${Math.min(sla,100)}%"></div></div>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function showTicket(id) {
+  const ticket = allTickets.find(t => t.id === id);
+  if (!ticket) return;
+
+  document.getElementById('modal-num').textContent   = ticket.ticket_number;
+  document.getElementById('modal-title').textContent = ticket.title;
+
+  const [sBadge, sLabel] = STATUS_BADGES[ticket.status] || ['badge-gray', ticket.status];
+  const [pBadge, pLabel] = PRIORITY_BADGES[ticket.priority] || ['badge-gray', ticket.priority];
+  const sla = ticket.sla_percentage;
+  const slaClass = sla >= 100 ? 'sla-bar-red' : sla >= 70 ? 'sla-bar-amber' : 'sla-bar-green';
+  const analystName = ticket.analyst?.name || 'Não atribuído';
+  const created = new Date(ticket.created_at).toLocaleString('pt-BR');
+
+  const timeline = (ticket.timeline || []).map(tl => {
+    const iconMap = {ticket:'🎫',escalate:'⬆️',assign:'👤',comment:'💬',status:'🔄',
+                     resolve:'✅',priority:'🚩',ai:'🤖',internal:'🔒'};
+    const colorMap = {blue:'tl-icon-blue',green:'tl-icon-green',purple:'tl-icon-purple',
+                      orange:'tl-icon-orange',red:'tl-icon-blue'};
+    const icon  = iconMap[tl.type] || '📋';
+    const color = colorMap[tl.icon_color] || 'tl-icon-blue';
+    const ts = new Date(tl.created_at).toLocaleString('pt-BR');
+    return `
+    <div class="timeline-item">
+      <div class="tl-icon ${color}">${icon}</div>
+      <div class="tl-content">
+        <div class="tl-action">${tl.action}</div>
+        ${tl.note ? `<div class="tl-note">${tl.note}</div>` : ''}
+        <div class="tl-time">${ts} · ${tl.by_name || ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="ticket-item-meta" style="margin-bottom:12px;">
+      <span class="badge ${sBadge}">${sLabel}</span>
+      <span class="badge ${pBadge}">${pLabel}</span>
+      <span class="badge badge-gray">🔧 ${ticket.level}</span>
+    </div>
+    <div style="background:var(--elevated);border-radius:8px;padding:12px;margin-bottom:14px;
+                font-size:13px;color:var(--text2);line-height:1.6;">${ticket.description}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;font-size:12px;">
+      <div><span style="color:var(--text3);">Analista:</span> <strong>${analystName}</strong></div>
+      <div><span style="color:var(--text3);">Aberto em:</span> <strong>${created}</strong></div>
+    </div>
+    ${sla > 0 ? `
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">SLA: ${sla}% consumido</div>
+      <div class="sla-bar-bg"><div class="sla-bar-fill ${slaClass}" style="width:${Math.min(sla,100)}%"></div></div>
+    </div>` : ''}
+    ${timeline ? `<div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;
+      letter-spacing:.07em;margin-bottom:10px;">Histórico</div>${timeline}` : ''}
+  `;
+
+  document.getElementById('ticket-modal').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target.id === 'ticket-modal') closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('ticket-modal').classList.remove('open');
+}
+
+// ── Novo chamado ──────────────────────────────────────────────────────────────
+
+async function loadCategories() {
+  try {
+    const res = await fetch(`${API_BASE}/categories`, {
+      headers: {'Authorization': `Bearer ${userToken}`},
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const sel = document.getElementById('new-category');
+    data.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.name;
+      sel.appendChild(opt);
+    });
+  } catch(e) {}
+}
+
+async function createTicket() {
+  const title       = document.getElementById('new-title').value.trim();
+  const description = document.getElementById('new-description').value.trim();
+  const category_id = document.getElementById('new-category').value || null;
+  const impact      = document.getElementById('new-impact').value;
+  const equipment   = document.getElementById('new-equipment').value.trim();
+  const btn         = document.getElementById('btn-create-ticket');
+
+  if (!title || !description) {
+    alert('Título e descrição são obrigatórios');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Abrindo chamado...';
+
+  try {
+    const res = await fetch(`${API_BASE}/portal/tickets`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({title, description, category_id, impact, equipment}),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.detail || 'Erro ao criar chamado');
+      return;
+    }
+    document.getElementById('ticket-success-msg').textContent =
+      `✅ Chamado ${data.ticket_number} aberto! Prioridade: ${data.priority}`;
+    document.getElementById('ticket-success').style.display = 'block';
+
+    // Limpar form
+    document.getElementById('new-title').value = '';
+    document.getElementById('new-description').value = '';
+    document.getElementById('new-category').value = '';
+    document.getElementById('new-impact').value = '';
+    document.getElementById('new-equipment').value = '';
+
+    await loadTickets();
+  } catch(e) {
+    alert('Erro de conexão. Tente novamente.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Abrir Chamado';
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('view-login').classList.contains('active')) {
+    doLogin();
+  }
+  if (e.key === 'Escape') closeModalDirect();
+});
+
+if (userToken && currentUser) {
+  initDashboard();
+} else {
+  // Preencher em dev
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    document.getElementById('login-email').value    = 'ana@empresa.com';
+    document.getElementById('login-password').value = 'Senha@123';
+  }
+}
+</script>
+</body>
+</html>

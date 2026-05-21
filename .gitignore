@@ -1,0 +1,32 @@
+# Ambiente Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.venv/
+env/
+
+# Banco de dados
+*.db
+*.sqlite3
+helpdesk.db
+
+# Variáveis de ambiente (NUNCA subir senhas)
+.env
+
+# Logs
+*.log
+
+# Arquivos temporários de análise (gerados pelo Claude)
+teste/mockup_extracted.html
+teste/mockup_full.html
+teste/_css.txt
+
+# ZIP original (pesado, já temos o código extraído)
+teste/*.zip
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
