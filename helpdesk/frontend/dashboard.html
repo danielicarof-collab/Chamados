@@ -574,6 +574,10 @@ td.number{font-family:'SF Mono','Fira Code',monospace;font-size:12px;font-weight
         <div class="form-group"><label>Departamento</label><select class="form-select" id="u-dept"><option value="">Selecionar...</option></select></div>
         <div class="form-group"><label>Ramal</label><input class="form-input" id="u-phone" placeholder="Ex: 1234"></div>
       </div>
+      <div class="form-row">
+        <div class="form-group"><label>Senha <span id="u-password-hint" style="color:var(--text3);font-weight:400;text-transform:none">(mín. 8 caracteres)</span></label><input class="form-input" id="u-password" type="password" placeholder="Senha de acesso ao portal"></div>
+        <div class="form-group"><label>Confirmar Senha</label><input class="form-input" id="u-password2" type="password" placeholder="Repita a senha"></div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeUserModal()">Cancelar</button>
@@ -1199,6 +1203,9 @@ function openUserModal(id){
   document.getElementById('u-email').value='';
   document.getElementById('u-phone').value='';
   document.getElementById('u-dept').value='';
+  document.getElementById('u-password').value='';
+  document.getElementById('u-password2').value='';
+  document.getElementById('u-password-hint').textContent=id?'(deixe em branco para não alterar)':'(mín. 8 caracteres)';
   if(id){ const u=_users.find(x=>x.id===id); if(u){ document.getElementById('u-name').value=u.name||''; document.getElementById('u-email').value=u.email||''; document.getElementById('u-phone').value=u.phone||''; document.getElementById('u-dept').value=u.department_id||''; }}
   document.getElementById('modal-user').classList.add('show');
 }
@@ -1211,8 +1218,15 @@ async function saveUser(){
   const email=document.getElementById('u-email').value.trim();
   const phone=document.getElementById('u-phone').value.trim();
   const deptId=document.getElementById('u-dept').value;
+  const pw=document.getElementById('u-password').value;
+  const pw2=document.getElementById('u-password2').value;
   if(!name) return toast('Informe o nome','err');
+  if(!email) return toast('Informe o e-mail','err');
+  if(!editUserId && !pw) return toast('Informe a senha','err');
+  if(pw && pw.length<8) return toast('Senha deve ter pelo menos 8 caracteres','err');
+  if(pw && pw!==pw2) return toast('As senhas não coincidem','err');
   const body={name,email,phone:phone||null,department_id:deptId?parseInt(deptId):null};
+  if(pw) body.password=pw;
   try {
     if(editUserId) await req('/users/'+editUserId,{method:'PUT',body:JSON.stringify(body)});
     else await req('/users',{method:'POST',body:JSON.stringify(body)});
