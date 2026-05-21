@@ -208,6 +208,24 @@ td.number{font-family:'SF Mono','Fira Code',monospace;font-size:12px;font-weight
 .page-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
 .page-btn:hover,.page-btn.active{background:var(--blue-dim);border-color:var(--blue);color:var(--blue)}
 .page-btn:disabled{opacity:.4;cursor:not-allowed}
+/* Ticket tabs */
+.ticket-tabs{display:flex;gap:4px;margin-bottom:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:4px}
+.ticket-tab{flex:1;padding:7px 12px;border-radius:7px;border:none;background:transparent;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.ticket-tab:hover{background:var(--elevated);color:var(--text)}
+.ticket-tab.active{background:var(--blue-dim);color:var(--blue)}
+.ticket-tab .tab-count{background:var(--elevated);color:var(--text3);font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;min-width:18px;text-align:center}
+.ticket-tab.active .tab-count{background:rgba(59,130,246,.3);color:var(--blue)}
+/* CRUD search bar */
+.crud-search{display:flex;align-items:center;gap:8px;background:var(--elevated);border:1px solid var(--border);border-radius:8px;padding:7px 12px;width:260px;margin-bottom:14px}
+.crud-search i{color:var(--text3);font-size:15px}
+.crud-search input{background:none;border:none;outline:none;color:var(--text);font-size:13px;width:100%;font-family:inherit}
+.crud-search input::placeholder{color:var(--text3)}
+/* Role badge */
+.role-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:600}
+.role-badge.admin{background:rgba(239,68,68,.15);color:var(--red)}
+.role-badge.manager{background:rgba(139,92,246,.15);color:var(--purple)}
+.role-badge.coordinator{background:rgba(245,158,11,.15);color:var(--amber)}
+.role-badge.analyst{background:var(--elevated);color:var(--text2)}
 </style>
 </head>
 <body>
@@ -300,8 +318,20 @@ td.number{font-family:'SF Mono','Fira Code',monospace;font-size:12px;font-weight
 
     <!-- VIEW: CHAMADOS -->
     <div id="view-tickets" class="view">
+      <!-- Abas por escopo (visibilidade por role) -->
+      <div class="ticket-tabs" id="ticket-tabs">
+        <button class="ticket-tab active" id="tab-all" onclick="setTicketTab('all',this)">
+          <i class="ti ti-list"></i> Todos <span class="tab-count" id="tc-all">—</span>
+        </button>
+        <button class="ticket-tab" id="tab-mine" onclick="setTicketTab('mine',this)">
+          <i class="ti ti-user"></i> Meus <span class="tab-count" id="tc-mine">—</span>
+        </button>
+        <button class="ticket-tab" id="tab-unassigned" onclick="setTicketTab('unassigned',this)">
+          <i class="ti ti-inbox"></i> Sem atribuição <span class="tab-count" id="tc-unassigned">—</span>
+        </button>
+      </div>
       <div class="filters">
-        <button class="filter-btn active" onclick="setFilter(this,'')">Todos</button>
+        <button class="filter-btn active" onclick="setFilter(this,'')">Todos os status</button>
         <button class="filter-btn" onclick="setFilter(this,'Aberto')">Abertos</button>
         <button class="filter-btn" onclick="setFilter(this,'Em andamento')">Em andamento</button>
         <button class="filter-btn" onclick="setFilter(this,'Pendente')">Pendentes</button>
@@ -315,7 +345,7 @@ td.number{font-family:'SF Mono','Fira Code',monospace;font-size:12px;font-weight
             <option value="">Todos os níveis</option>
             <option>N1</option><option>N2</option><option>N3</option>
           </select>
-          <select class="filter-select" id="filter-analyst" onchange="loadTickets()">
+          <select class="filter-select" id="filter-analyst" onchange="loadTickets()" style="display:none" id="filter-analyst-wrap">
             <option value="">Todos os analistas</option>
           </select>
         </div>
@@ -373,6 +403,7 @@ td.number{font-family:'SF Mono','Fira Code',monospace;font-size:12px;font-weight
         <div class="section-title">Usuários</div>
         <button class="btn btn-primary btn-sm" onclick="openUserModal()"><i class="ti ti-plus"></i> Novo Usuário</button>
       </div>
+      <div class="crud-search"><i class="ti ti-search"></i><input type="text" placeholder="Buscar por nome ou e-mail..." oninput="filterUsers(this.value)"></div>
       <div id="usuarios-table"></div>
     </div>
 
@@ -382,6 +413,7 @@ td.number{font-family:'SF Mono','Fira Code',monospace;font-size:12px;font-weight
         <div class="section-title">Analistas</div>
         <button class="btn btn-primary btn-sm" onclick="openAnalystModal()"><i class="ti ti-plus"></i> Novo Analista</button>
       </div>
+      <div class="crud-search"><i class="ti ti-search"></i><input type="text" placeholder="Buscar por nome ou e-mail..." oninput="filterAnalysts(this.value)"></div>
       <div id="analistas-table"></div>
     </div>
 
@@ -391,6 +423,7 @@ td.number{font-family:'SF Mono','Fira Code',monospace;font-size:12px;font-weight
         <div class="section-title">Categorias</div>
         <button class="btn btn-primary btn-sm" onclick="openCategoryModal()"><i class="ti ti-plus"></i> Nova Categoria</button>
       </div>
+      <div class="crud-search"><i class="ti ti-search"></i><input type="text" placeholder="Buscar categoria..." oninput="filterCategories(this.value)"></div>
       <div id="categorias-table"></div>
     </div>
 
@@ -444,8 +477,8 @@ td.number{font-family:'SF Mono','Fira Code',monospace;font-size:12px;font-weight
         <div class="esc-node"><div class="esc-circle" id="esc-n3">N3</div><div class="esc-label">N3 — Infra</div></div>
       </div>
       <div class="esc-actions">
-        <button class="btn btn-ghost btn-sm" onclick="doEscalate('N2')"><i class="ti ti-arrow-up"></i> Escalar N2</button>
-        <button class="btn btn-ghost btn-sm" onclick="doEscalate('N3')"><i class="ti ti-arrow-up"></i> Escalar N3</button>
+        <button class="btn btn-ghost btn-sm" onclick="openEscalateModal('N2')"><i class="ti ti-arrow-up"></i> Escalar N2</button>
+        <button class="btn btn-ghost btn-sm" onclick="openEscalateModal('N3')"><i class="ti ti-arrow-up"></i> Escalar N3</button>
         <button class="btn btn-ghost btn-sm" onclick="toggleAssign()"><i class="ti ti-user"></i> Atribuir</button>
       </div>
       <div id="d-assign-wrap" style="display:none;margin-top:10px;display:none">
@@ -502,11 +535,12 @@ td.number{font-family:'SF Mono','Fira Code',monospace;font-size:12px;font-weight
       <button class="btn btn-ghost btn-sm" onclick="doComment()"><i class="ti ti-message"></i> Comentar</button>
       <button class="btn btn-primary btn-sm" style="flex:1" onclick="doResolve()"><i class="ti ti-check"></i> Resolver</button>
     </div>
+    <button class="btn btn-danger btn-sm" style="width:100%" onclick="doCancelTicket()"><i class="ti ti-trash"></i> Cancelar Chamado</button>
   </div>
 </div>
 
 <!-- MODAL: NOVO CHAMADO -->
-<div class="modal-backdrop" id="modal-ticket">
+<div class="modal-backdrop" id="modal-ticket" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-header">
       <h3><i class="ti ti-ticket" style="color:var(--blue)"></i> Novo Chamado</h3>
@@ -533,9 +567,15 @@ td.number{font-family:'SF Mono','Fira Code',monospace;font-size:12px;font-weight
         <label>Título</label>
         <input class="form-input" type="text" id="m-title" placeholder="Descreva o problema em uma linha..." oninput="debounceAnalyze()">
       </div>
-      <div class="form-group">
-        <label>Descrição</label>
-        <textarea class="form-textarea" id="m-desc" placeholder="Explique o problema, quando começou, quais sistemas afetados..." oninput="debounceAnalyze()"></textarea>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Descrição</label>
+          <textarea class="form-textarea" id="m-desc" placeholder="Explique o problema, quando começou, quais sistemas afetados..." oninput="debounceAnalyze()"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Equipamento <span style="color:var(--text3);font-weight:400;text-transform:none">(opcional)</span></label>
+          <input class="form-input" id="m-equipment" placeholder="Ex: Notebook Dell, Impressora HP...">
+        </div>
       </div>
       <div class="ai-panel" id="m-ai-panel">
         <div class="ai-panel-header">
@@ -564,7 +604,7 @@ td.number{font-family:'SF Mono','Fira Code',monospace;font-size:12px;font-weight
 </div>
 
 <!-- MODAL: USUÁRIO -->
-<div class="modal-backdrop" id="modal-user">
+<div class="modal-backdrop" id="modal-user" onclick="if(event.target===this)closeUserModal()">
   <div class="modal">
     <div class="modal-header"><h3 id="user-modal-title">Novo Usuário</h3><button class="btn btn-ghost btn-sm" onclick="closeUserModal()"><i class="ti ti-x"></i></button></div>
     <div class="modal-body">
@@ -587,16 +627,17 @@ td.number{font-family:'SF Mono','Fira Code',monospace;font-size:12px;font-weight
 </div>
 
 <!-- MODAL: ANALISTA -->
-<div class="modal-backdrop" id="modal-analyst">
+<div class="modal-backdrop" id="modal-analyst" onclick="if(event.target===this)closeAnalystModal()">
   <div class="modal">
     <div class="modal-header"><h3 id="analyst-modal-title">Novo Analista</h3><button class="btn btn-ghost btn-sm" onclick="closeAnalystModal()"><i class="ti ti-x"></i></button></div>
     <div class="modal-body">
       <div class="form-group"><label>Nome</label><input class="form-input" id="a-name" placeholder="Nome completo"></div>
       <div class="form-group"><label>E-mail</label><input class="form-input" id="a-email" type="email" placeholder="email@empresa.com"></div>
       <div class="form-row">
-        <div class="form-group"><label>Nível</label><select class="form-select" id="a-level"><option value="N1">N1 — Suporte</option><option value="N2">N2 — Especialista</option><option value="N3">N3 — Infra</option></select></div>
-        <div class="form-group"><label>Senha</label><input class="form-input" id="a-password" type="password" placeholder="Mínimo 6 caracteres"></div>
+        <div class="form-group"><label>Nível Técnico</label><select class="form-select" id="a-level"><option value="N1">N1 — Suporte</option><option value="N2">N2 — Especialista</option><option value="N3">N3 — Infra</option></select></div>
+        <div class="form-group"><label>Papel / Permissão</label><select class="form-select" id="a-role"><option value="analyst">Analista</option><option value="coordinator">Coordenador</option><option value="manager">Gestor</option><option value="admin">Admin</option></select></div>
       </div>
+      <div class="form-group"><label>Senha <span id="a-password-hint" style="color:var(--text3);font-weight:400;text-transform:none">(mín. 6 caracteres)</span></label><input class="form-input" id="a-password" type="password" placeholder="Senha de acesso ao painel"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeAnalystModal()">Cancelar</button>
@@ -606,7 +647,7 @@ td.number{font-family:'SF Mono','Fira Code',monospace;font-size:12px;font-weight
 </div>
 
 <!-- MODAL: CATEGORIA -->
-<div class="modal-backdrop" id="modal-category">
+<div class="modal-backdrop" id="modal-category" onclick="if(event.target===this)closeCategoryModal()">
   <div class="modal" style="width:380px">
     <div class="modal-header"><h3 id="cat-modal-title">Nova Categoria</h3><button class="btn btn-ghost btn-sm" onclick="closeCategoryModal()"><i class="ti ti-x"></i></button></div>
     <div class="modal-body">
@@ -616,6 +657,34 @@ td.number{font-family:'SF Mono','Fira Code',monospace;font-size:12px;font-weight
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeCategoryModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveCategory()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ESCALADA -->
+<div class="modal-backdrop" id="modal-escalada" onclick="if(event.target===this)closeEscalateModal()">
+  <div class="modal" style="width:420px">
+    <div class="modal-header">
+      <h3><i class="ti ti-arrows-up" style="color:var(--orange)"></i> Escalar Chamado</h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeEscalateModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--orange-dim);border:1px solid rgba(249,115,22,.3);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--orange);margin-bottom:4px">
+        <i class="ti ti-arrow-up" style="font-size:14px"></i>
+        Escalando para <strong id="esc-target-label">N2</strong>
+      </div>
+      <div class="form-group">
+        <label>Atribuir para analista <span style="color:var(--text3);font-weight:400;text-transform:none">(opcional)</span></label>
+        <select class="form-select" id="esc-analyst-select"><option value="">Não atribuir agora</option></select>
+      </div>
+      <div class="form-group">
+        <label>Motivo da escalada <span style="color:var(--red)">*</span></label>
+        <textarea class="form-textarea" id="esc-reason" placeholder="Descreva por que está escalando este chamado..." style="min-height:80px"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeEscalateModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitEscalate()" style="background:var(--orange)"><i class="ti ti-arrows-up"></i> Confirmar Escalada</button>
     </div>
   </div>
 </div>
@@ -649,11 +718,15 @@ async function req(url, opts={}){
 let currentView = 'dashboard';
 let currentTicketId = null;
 let ticketStatus = '';
+let ticketTab = 'all';
 let ticketPage = 1;
 let aiData = null;
 let editUserId = null, editAnalystId = null, editCatId = null;
 let _analysts = [], _categories = [], _users = [], _depts = [];
+let _usersFiltered = [], _analystsFiltered = [], _catsFiltered = [];
 let debTimer = null;
+let currentAnalyst = null;
+let escalateTarget = null;
 
 // ── INIT ────────────────────────────────────────────────────────────────────
 (async function init(){
@@ -661,14 +734,27 @@ let debTimer = null;
   try {
     const me = await req('/auth/me');
     if(!me) return;
+    currentAnalyst = me;
     const initials = me.name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
     document.getElementById('user-avatar').textContent = initials;
     document.getElementById('user-name').textContent = me.name;
-    document.getElementById('user-role').textContent = (me.role||'analista')+' · '+(me.level||'');
+    const roleLabels = {admin:'Admin',manager:'Gestor',coordinator:'Coordenador',analyst:'Analista'};
+    document.getElementById('user-role').textContent = (roleLabels[me.role]||me.role||'Analista')+' · '+(me.level||'');
+    applyRoleVisibility(me.role);
   } catch(e){ console.warn('me:', e); }
   loadDashboard();
   loadCaches();
 })();
+
+function applyRoleVisibility(role){
+  const isAdmin = role==='admin'||role==='manager'||role==='coordinator';
+  // Aba "Todos" só para admin/gestor/coordenador
+  const tabAll = document.getElementById('tab-all');
+  if(!isAdmin){ tabAll.style.display='none'; setTicketTab('mine', document.getElementById('tab-mine')); }
+  // Filtro de analistas só para admin/gestor
+  const fa = document.getElementById('filter-analyst');
+  if(fa) fa.style.display = isAdmin ? '' : 'none';
+}
 
 async function loadCaches(){
   try { _analysts   = (await req('/analysts'))   || []; populateAnalystFilter(); populateAnalystSelect(); } catch(e){}
@@ -761,6 +847,9 @@ async function loadTickets(search){
   if(lvl) params.set('level', lvl);
   if(ana) params.set('analyst_id', ana);
   if(q)   params.set('search', q);
+  // Aplica filtro por tab
+  if(ticketTab==='mine' && currentAnalyst) params.set('analyst_id', currentAnalyst.id);
+  if(ticketTab==='unassigned') params.set('unassigned', 'true');
   params.set('page', ticketPage);
   params.set('per_page', 20);
   try {
@@ -769,13 +858,40 @@ async function loadTickets(search){
     renderTicketTable(data.items, 'tickets-table', true);
     renderPagination(data.page, data.pages, 'tickets-pagination');
     document.getElementById('badge-tickets').textContent = data.total;
+    // Atualiza contadores das abas
+    updateTabCounts();
   } catch(e){ document.getElementById('tickets-table').innerHTML='<div class="empty"><i class="ti ti-alert-circle" style="color:var(--red)"></i><p>'+e.message+'</p></div>'; }
+}
+
+async function updateTabCounts(){
+  try {
+    const all = await req('/tickets?per_page=1&page=1');
+    if(all) document.getElementById('tc-all').textContent = all.total;
+  } catch(e){}
+  try {
+    if(currentAnalyst){
+      const mine = await req('/tickets?analyst_id='+currentAnalyst.id+'&per_page=1&page=1');
+      if(mine) document.getElementById('tc-mine').textContent = mine.total;
+    }
+  } catch(e){}
+  try {
+    const unassigned = await req('/tickets?unassigned=true&per_page=1&page=1');
+    if(unassigned) document.getElementById('tc-unassigned').textContent = unassigned.total;
+  } catch(e){}
 }
 
 function setFilter(el, status){
   document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');
   ticketStatus = status;
+  ticketPage = 1;
+  loadTickets();
+}
+
+function setTicketTab(tab, el){
+  document.querySelectorAll('.ticket-tab').forEach(x=>x.classList.remove('active'));
+  if(el) el.classList.add('active');
+  ticketTab = tab;
   ticketPage = 1;
   loadTickets();
 }
@@ -929,14 +1045,42 @@ async function doAssign(){
   } catch(e){ toast(e.message,'err'); }
 }
 
-async function doEscalate(nivel){
+function openEscalateModal(nivel){
   if(!currentTicketId) return;
-  const reason=prompt('Motivo da escalada para '+nivel+':');
-  if(reason===null) return;
+  escalateTarget=nivel;
+  document.getElementById('esc-target-label').textContent=nivel;
+  document.getElementById('esc-reason').value='';
+  // Populate analyst select filtered by target level
+  const sel=document.getElementById('esc-analyst-select');
+  const available=_analysts.filter(a=>a.active&&a.level===nivel);
+  sel.innerHTML='<option value="">Não atribuir agora</option>'+available.map(a=>`<option value="${a.id}">${esc(a.name)} (${a.level})</option>`).join('');
+  document.getElementById('modal-escalada').classList.add('show');
+}
+function closeEscalateModal(){ document.getElementById('modal-escalada').classList.remove('show'); }
+
+async function submitEscalate(){
+  const reason=document.getElementById('esc-reason').value.trim();
+  if(!reason) return toast('Informe o motivo da escalada','err');
+  const analystId=document.getElementById('esc-analyst-select').value;
   try {
-    await req('/tickets/'+currentTicketId+'/escalate',{method:'POST',body:JSON.stringify({nivel,reason:reason||'Escalado manualmente'})});
-    toast('Chamado escalado para '+nivel);
+    await req('/tickets/'+currentTicketId+'/escalate',{method:'POST',body:JSON.stringify({nivel:escalateTarget,reason})});
+    if(analystId){
+      await req('/tickets/'+currentTicketId,{method:'PUT',body:JSON.stringify({analyst_id:parseInt(analystId)})});
+    }
+    toast('Chamado escalado para '+escalateTarget);
+    closeEscalateModal();
     openTicket(currentTicketId);
+    if(currentView==='tickets') loadTickets(); else loadDashboard();
+  } catch(e){ toast(e.message,'err'); }
+}
+
+async function doCancelTicket(){
+  if(!currentTicketId) return;
+  if(!confirm('Tem certeza que deseja cancelar este chamado? Esta ação não pode ser desfeita.')) return;
+  try {
+    await req('/tickets/'+currentTicketId,{method:'PUT',body:JSON.stringify({status:'Cancelado'})});
+    toast('Chamado cancelado');
+    closeDrawer();
     if(currentView==='tickets') loadTickets(); else loadDashboard();
   } catch(e){ toast(e.message,'err'); }
 }
@@ -986,12 +1130,18 @@ async function doAISuggest(){
 }
 
 // ── MODAL: NOVO CHAMADO ──────────────────────────────────────────────────────
-function openModal(){
+async function openModal(){
   document.getElementById('modal-ticket').classList.add('show');
   document.getElementById('m-title').value='';
   document.getElementById('m-desc').value='';
+  document.getElementById('m-equipment').value='';
   document.getElementById('m-ai-panel').classList.remove('show');
-  aiData=null;
+  aiData=null; acceptedAI=false;
+  // Garantir que categorias e usuários estejam carregados
+  if(!_categories.length){ try{ _categories=await req('/categories')||[]; }catch(e){} }
+  if(!_users.length){ try{ _users=await req('/users')||[]; }catch(e){} }
+  populateCategorySelect();
+  populateUserSelect();
 }
 function closeModal(){ document.getElementById('modal-ticket').classList.remove('show'); }
 
@@ -1039,11 +1189,13 @@ async function submitTicket(){
   const btn=document.getElementById('m-submit');
   btn.disabled=true; btn.innerHTML='<div class="spinner"></div> Abrindo...';
   try {
-    const body={
+    const equipment = document.getElementById('m-equipment').value.trim();
+  const body={
       title, description:desc||title,
       user_id: parseInt(userId),
       category_id: catId?parseInt(catId):null,
-      impact, level: aiData?.level||'N1',
+      impact, equipment: equipment||null,
+      level: aiData?.level||'N1',
       priority: aiData?.priority||'Média',
       priority_source: acceptedAI&&aiData?'ai':'manual',
       ai_analysis: acceptedAI&&aiData?aiData:null,
@@ -1114,45 +1266,50 @@ async function loadReports(){
   try {
     const cats=await req('/reports/by-category');
     if(cats&&cats.length){
-      const max=cats[0].total||1;
+      // API retorna {category, count}
+      const max=cats[0].count||1;
       const colors=['var(--blue)','var(--purple)','var(--amber)','var(--orange)','var(--green)','var(--red)'];
       document.getElementById('chart-category').innerHTML=cats.slice(0,6).map((c,i)=>`
         <div class="chart-bar-row">
           <div class="chart-bar-label">${esc(c.category||'—')}</div>
-          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round(c.total/max*100)}%;background:${colors[i%colors.length]}"></div></div>
-          <div class="chart-bar-val">${c.total}</div>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round((c.count||0)/max*100)}%;background:${colors[i%colors.length]}"></div></div>
+          <div class="chart-bar-val">${c.count||0}</div>
         </div>`).join('');
     }
   } catch(e){}
 
   try {
-    const pris=await req('/reports/by-priority');
-    if(pris&&pris.length){
-      const total=pris.reduce((s,p)=>s+p.total,0)||1;
+    // API retorna objeto {"Crítica":5,"Alta":3,...} — converter para array
+    const prisRaw=await req('/reports/by-priority');
+    if(prisRaw){
+      const pris=Object.entries(prisRaw).map(([priority,count])=>({priority,count}))
+        .sort((a,b)=>b.count-a.count);
+      const total=pris.reduce((s,p)=>s+p.count,0)||1;
       const priColors={Crítica:'var(--red)',Alta:'var(--orange)',Média:'var(--amber)',Baixa:'var(--green)'};
-      let offset=25; const circles=[];
+      let offset=25;
       const svgParts=pris.map(p=>{
-        const pct=p.total/total*100;
+        const pct=p.count/total*100;
         const dash=pct+' '+(100-pct);
         const c=`<circle cx="18" cy="18" r="15.9" fill="none" stroke="${priColors[p.priority]||'var(--blue)'}" stroke-width="3.8" stroke-dasharray="${dash}" stroke-dashoffset="-${offset}" transform="rotate(-90 18 18)"/>`;
         offset+=pct;
         return c;
       }).join('');
       document.getElementById('donut-svg').innerHTML=`<circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--elevated)" stroke-width="3.8"/>${svgParts}`;
-      document.getElementById('donut-legend').innerHTML=pris.map(p=>`<div class="donut-leg"><div class="donut-dot" style="background:${priColors[p.priority]||'var(--blue)'}"></div>${p.priority} ${Math.round(p.total/total*100)}%</div>`).join('');
+      document.getElementById('donut-legend').innerHTML=pris.map(p=>`<div class="donut-leg"><div class="donut-dot" style="background:${priColors[p.priority]||'var(--blue)'}"></div>${p.priority} ${Math.round(p.count/total*100)}%</div>`).join('');
     }
   } catch(e){}
 
   try {
     const anas=await req('/reports/by-analyst');
     if(anas&&anas.length){
-      const max=anas[0].resolved||1;
+      // API retorna {analyst, count}
+      const max=anas[0].count||1;
       const colors=['var(--green)','var(--blue)','var(--purple)','var(--amber)'];
       document.getElementById('chart-analyst').innerHTML=anas.slice(0,5).map((a,i)=>`
         <div class="chart-bar-row">
           <div class="chart-bar-label">${esc(a.analyst||'—')}</div>
-          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round((a.resolved||0)/max*100)}%;background:${colors[i%colors.length]}"></div></div>
-          <div class="chart-bar-val">${a.resolved||0}</div>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${Math.round((a.count||0)/max*100)}%;background:${colors[i%colors.length]}"></div></div>
+          <div class="chart-bar-val">${a.count||0}</div>
         </div>`).join('');
     }
   } catch(e){}
@@ -1176,19 +1333,25 @@ async function loadUsers(){
   el.innerHTML='<div class="empty"><i class="ti ti-loader" style="animation:spin 1s linear infinite;font-size:32px"></i></div>';
   try {
     _users=await req('/users')||[];
-    if(!_users.length){ el.innerHTML='<div class="empty"><i class="ti ti-users"></i><p>Nenhum usuário cadastrado</p></div>'; return; }
-    const rows=_users.map(u=>`<tr>
-      <td class="bold">${esc(u.name)}</td>
-      <td>${esc(u.email||'—')}</td>
-      <td>${esc(u.department?.name||'—')}</td>
-      <td>${esc(u.phone||'—')}</td>
-      <td style="display:flex;gap:6px">
-        <button class="btn btn-ghost btn-sm" onclick="editUser(${u.id})"><i class="ti ti-edit"></i></button>
-        <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})"><i class="ti ti-trash"></i></button>
-      </td>
-    </tr>`).join('');
-    el.innerHTML=`<div class="table-wrapper"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Departamento</th><th>Ramal</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    _usersFiltered=[..._users];
+    renderUsersTable(el);
   } catch(e){ el.innerHTML='<div class="empty"><i class="ti ti-alert-circle" style="color:var(--red)"></i><p>'+e.message+'</p></div>'; }
+}
+
+function renderUsersTable(el){
+  el=el||document.getElementById('usuarios-table');
+  if(!_usersFiltered.length){ el.innerHTML='<div class="empty"><i class="ti ti-users"></i><p>Nenhum usuário encontrado</p></div>'; return; }
+  const rows=_usersFiltered.map(u=>`<tr>
+    <td class="bold">${esc(u.name)}</td>
+    <td>${esc(u.email||'—')}</td>
+    <td>${esc(u.department?.name||'—')}</td>
+    <td>${esc(u.phone||'—')}</td>
+    <td style="display:flex;gap:6px">
+      <button class="btn btn-ghost btn-sm" onclick="editUser(${u.id})"><i class="ti ti-edit"></i></button>
+      <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})"><i class="ti ti-trash"></i></button>
+    </td>
+  </tr>`).join('');
+  el.innerHTML=`<div class="table-wrapper"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Departamento</th><th>Ramal</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 function populateDeptSelect(){
@@ -1247,18 +1410,29 @@ async function loadAnalysts(){
   el.innerHTML='<div class="empty"><i class="ti ti-loader" style="animation:spin 1s linear infinite;font-size:32px"></i></div>';
   try {
     _analysts=await req('/analysts')||[];
-    if(!_analysts.length){ el.innerHTML='<div class="empty"><i class="ti ti-user-shield"></i><p>Nenhum analista cadastrado</p></div>'; return; }
-    const rows=_analysts.map(a=>`<tr>
+    _analystsFiltered=[..._analysts];
+    renderAnalystsTable(el);
+  } catch(e){ el.innerHTML='<div class="empty"><i class="ti ti-alert-circle" style="color:var(--red)"></i><p>'+e.message+'</p></div>'; }
+}
+
+const ROLE_LABELS={analyst:'Analista',coordinator:'Coordenador',manager:'Gestor',admin:'Admin'};
+const ROLE_COLORS={analyst:'andamento',coordinator:'media',manager:'aberto',admin:'critica'};
+
+function renderAnalystsTable(el){
+  el=el||document.getElementById('analistas-table');
+  if(!_analystsFiltered.length){ el.innerHTML='<div class="empty"><i class="ti ti-user-shield"></i><p>Nenhum analista encontrado</p></div>'; return; }
+    const rows=_analystsFiltered.map(a=>`<tr>
       <td class="bold">${esc(a.name)}</td>
       <td>${esc(a.email||'—')}</td>
       <td><span class="badge level">${a.level||'—'}</span></td>
+      <td><span class="badge ${ROLE_COLORS[a.role]||'andamento'}">${ROLE_LABELS[a.role]||a.role||'—'}</span></td>
       <td><span class="badge ${a.active?'resolvido':'cancelado'}">${a.active?'Ativo':'Inativo'}</span></td>
       <td style="display:flex;gap:6px">
         <button class="btn btn-ghost btn-sm" onclick="editAnalyst(${a.id})"><i class="ti ti-edit"></i></button>
         <button class="btn btn-danger btn-sm" onclick="deleteAnalyst(${a.id})"><i class="ti ti-trash"></i></button>
       </td>
     </tr>`).join('');
-    el.innerHTML=`<div class="table-wrapper"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Nível</th><th>Status</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    el.innerHTML=`<div class="table-wrapper"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Nível</th><th>Papel</th><th>Status</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   } catch(e){ el.innerHTML='<div class="empty"><i class="ti ti-alert-circle" style="color:var(--red)"></i><p>'+e.message+'</p></div>'; }
 }
 
@@ -1274,7 +1448,17 @@ function openAnalystModal(id){
   document.getElementById('a-email').value='';
   document.getElementById('a-password').value='';
   document.getElementById('a-level').value='N1';
-  if(id){ const a=_analysts.find(x=>x.id===id); if(a){ document.getElementById('a-name').value=a.name||''; document.getElementById('a-email').value=a.email||''; document.getElementById('a-level').value=a.level||'N1'; }}
+  document.getElementById('a-role').value='analyst';
+  document.getElementById('a-password-hint').textContent=id?'(deixe em branco para não alterar)':'(mín. 6 caracteres)';
+  if(id){
+    const a=_analysts.find(x=>x.id===id);
+    if(a){
+      document.getElementById('a-name').value=a.name||'';
+      document.getElementById('a-email').value=a.email||'';
+      document.getElementById('a-level').value=a.level||'N1';
+      document.getElementById('a-role').value=a.role||'analyst';
+    }
+  }
   document.getElementById('modal-analyst').classList.add('show');
 }
 function closeAnalystModal(){ document.getElementById('modal-analyst').classList.remove('show'); }
@@ -1286,8 +1470,10 @@ async function saveAnalyst(){
   const email=document.getElementById('a-email').value.trim();
   const password=document.getElementById('a-password').value;
   const level=document.getElementById('a-level').value;
+  const role=document.getElementById('a-role').value;
   if(!name||!email) return toast('Preencha nome e e-mail','err');
-  const body={name,email,level};
+  if(password&&password.length<6) return toast('Senha deve ter pelo menos 6 caracteres','err');
+  const body={name,email,level,role};
   if(password) body.password=password;
   try {
     if(editAnalystId) await req('/analysts/'+editAnalystId,{method:'PUT',body:JSON.stringify(body)});
@@ -1309,17 +1495,23 @@ async function loadCategories(){
   el.innerHTML='<div class="empty"><i class="ti ti-loader" style="animation:spin 1s linear infinite;font-size:32px"></i></div>';
   try {
     _categories=await req('/categories')||[];
-    if(!_categories.length){ el.innerHTML='<div class="empty"><i class="ti ti-tags"></i><p>Nenhuma categoria cadastrada</p></div>'; return; }
-    const rows=_categories.map(c=>`<tr>
-      <td class="bold">${esc(c.name)}</td>
-      <td>${esc(c.description||'—')}</td>
-      <td style="display:flex;gap:6px">
-        <button class="btn btn-ghost btn-sm" onclick="editCategory(${c.id})"><i class="ti ti-edit"></i></button>
-        <button class="btn btn-danger btn-sm" onclick="deleteCategory(${c.id})"><i class="ti ti-trash"></i></button>
-      </td>
-    </tr>`).join('');
-    el.innerHTML=`<div class="table-wrapper"><table><thead><tr><th>Nome</th><th>Descrição</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    _catsFiltered=[..._categories];
+    renderCategoriesTable(el);
   } catch(e){ el.innerHTML='<div class="empty"><i class="ti ti-alert-circle" style="color:var(--red)"></i><p>'+e.message+'</p></div>'; }
+}
+
+function renderCategoriesTable(el){
+  el=el||document.getElementById('categorias-table');
+  if(!_catsFiltered.length){ el.innerHTML='<div class="empty"><i class="ti ti-tags"></i><p>Nenhuma categoria encontrada</p></div>'; return; }
+  const rows=_catsFiltered.map(c=>`<tr>
+    <td class="bold">${esc(c.name)}</td>
+    <td>${esc(c.description||'—')}</td>
+    <td style="display:flex;gap:6px">
+      <button class="btn btn-ghost btn-sm" onclick="editCategory(${c.id})"><i class="ti ti-edit"></i></button>
+      <button class="btn btn-danger btn-sm" onclick="deleteCategory(${c.id})"><i class="ti ti-trash"></i></button>
+    </td>
+  </tr>`).join('');
+  el.innerHTML=`<div class="table-wrapper"><table><thead><tr><th>Nome</th><th>Descrição</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 function openCategoryModal(id){
@@ -1351,6 +1543,23 @@ async function deleteCategory(id){
   if(!confirm('Excluir categoria?')) return;
   try { await req('/categories/'+id,{method:'DELETE'}); toast('Categoria excluída'); loadCategories(); }
   catch(e){ toast(e.message,'err'); }
+}
+
+// ── BUSCA / FILTRO NOS CRUDs ─────────────────────────────────────────────────
+function filterUsers(q){
+  const s=q.toLowerCase();
+  _usersFiltered=_users.filter(u=>(u.name||'').toLowerCase().includes(s)||(u.email||'').toLowerCase().includes(s)||(u.department?.name||'').toLowerCase().includes(s));
+  renderUsersTable();
+}
+function filterAnalysts(q){
+  const s=q.toLowerCase();
+  _analystsFiltered=_analysts.filter(a=>(a.name||'').toLowerCase().includes(s)||(a.email||'').toLowerCase().includes(s)||(a.level||'').toLowerCase().includes(s)||(ROLE_LABELS[a.role]||'').toLowerCase().includes(s));
+  renderAnalystsTable();
+}
+function filterCategories(q){
+  const s=q.toLowerCase();
+  _catsFiltered=_categories.filter(c=>(c.name||'').toLowerCase().includes(s)||(c.description||'').toLowerCase().includes(s));
+  renderCategoriesTable();
 }
 
 // ── CONFIG ────────────────────────────────────────────────────────────────────
