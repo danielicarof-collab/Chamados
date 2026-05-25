@@ -1433,7 +1433,6 @@ function renderAnalystsTable(el){
       </td>
     </tr>`).join('');
     el.innerHTML=`<div class="table-wrapper"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Nível</th><th>Papel</th><th>Status</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table></div>`;
-  } catch(e){ el.innerHTML='<div class="empty"><i class="ti ti-alert-circle" style="color:var(--red)"></i><p>'+e.message+'</p></div>'; }
 }
 
 function populateAnalystFilter(){
